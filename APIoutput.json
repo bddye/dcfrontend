@@ -1,0 +1,3104 @@
+{
+    "image_name": "devicecontroller1",
+    "id": "",
+    "inter_config": {
+        "openapi": "3.0.1",
+        "info": {
+            "title": "API Documentation",
+            "version": "1.0"
+        },
+        "paths": {
+            "/server/openPort": {
+                "post": {
+                    "summary": "openPort",
+                    "description": "openPort",
+                    "requestBody": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "description": "",
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/server/closePort/{port}": {
+                "delete": {
+                    "summary": "closePort",
+                    "description": "closePort",
+                    "parameters": [
+                        {
+                            "name": "port",
+                            "in": "path",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "integer"
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/server/getExampleTCPoServerStartEntity": {
+                "get": {
+                    "summary": "getExampleTCPoServerStartEntity",
+                    "description": "getExampleTCPoServerStartEntity",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "port": {
+                                                                "type": "integer",
+                                                                "description": ""
+                                                            },
+                                                            "enabled": {
+                                                                "type": "boolean",
+                                                                "description": ""
+                                                            },
+                                                            "bufferProcessMode": {
+                                                                "type": "string",
+                                                                "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                                                "enum": [
+                                                                    "DELIMITED",
+                                                                    "FIXED_LENGTH",
+                                                                    "CUSTOM"
+                                                                ]
+                                                            },
+                                                            "script": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "description": ""
+                                                                    },
+                                                                    "script": {
+                                                                        "type": "string",
+                                                                        "description": ""
+                                                                    }
+                                                                },
+                                                                "description": ""
+                                                            },
+                                                            "tcPoServerStart": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "port": {
+                                                                        "type": "integer",
+                                                                        "description": ""
+                                                                    },
+                                                                    "server": {
+                                                                        "type": "object",
+                                                                        "properties": {},
+                                                                        "description": ""
+                                                                    },
+                                                                    "vertx": {
+                                                                        "type": "object",
+                                                                        "properties": {},
+                                                                        "description": ""
+                                                                    },
+                                                                    "tcpoConnectManage": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "vertx": {
+                                                                                "type": "object",
+                                                                                "properties": {},
+                                                                                "description": ""
+                                                                            },
+                                                                            "tcpoPayloadProcess": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "applicationContext": {
+                                                                                        "type": "object",
+                                                                                        "properties": {},
+                                                                                        "description": ""
+                                                                                    },
+                                                                                    "classManager": {
+                                                                                        "type": "object",
+                                                                                        "properties": {
+                                                                                            "applicationContext": {
+                                                                                                "type": "object",
+                                                                                                "properties": {},
+                                                                                                "description": ""
+                                                                                            }
+                                                                                        },
+                                                                                        "description": ""
+                                                                                    }
+                                                                                },
+                                                                                "description": ""
+                                                                            },
+                                                                            "bufferProcessMode": {
+                                                                                "type": "string",
+                                                                                "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                                                                "default": "BufferProcessMode.DELIMITED",
+                                                                                "enum": [
+                                                                                    "DELIMITED",
+                                                                                    "FIXED_LENGTH",
+                                                                                    "CUSTOM"
+                                                                                ]
+                                                                            },
+                                                                            "script": {
+                                                                                "type": "object",
+                                                                                "properties": {
+                                                                                    "name": {
+                                                                                        "type": "string",
+                                                                                        "description": ""
+                                                                                    },
+                                                                                    "script": {
+                                                                                        "type": "string",
+                                                                                        "description": ""
+                                                                                    }
+                                                                                },
+                                                                                "description": "脚本，仅在CUSTOM模式中用"
+                                                                            }
+                                                                        },
+                                                                        "description": ""
+                                                                    },
+                                                                    "bufferProcessMode": {
+                                                                        "type": "string",
+                                                                        "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                                                        "enum": [
+                                                                            "DELIMITED",
+                                                                            "FIXED_LENGTH",
+                                                                            "CUSTOM"
+                                                                        ]
+                                                                    },
+                                                                    "script": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "name": {
+                                                                                "type": "string",
+                                                                                "description": ""
+                                                                            },
+                                                                            "script": {
+                                                                                "type": "string",
+                                                                                "description": ""
+                                                                            }
+                                                                        },
+                                                                        "description": ""
+                                                                    }
+                                                                },
+                                                                "description": ""
+                                                            }
+                                                        },
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/server/openTCPoPort": {
+                "post": {
+                    "summary": "openTCPoPort",
+                    "description": "openTCPoPort",
+                    "requestBody": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "port": {
+                                            "type": "integer",
+                                            "description": ""
+                                        },
+                                        "enabled": {
+                                            "type": "boolean",
+                                            "description": ""
+                                        },
+                                        "bufferProcessMode": {
+                                            "type": "string",
+                                            "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                            "enum": [
+                                                "DELIMITED",
+                                                "FIXED_LENGTH",
+                                                "CUSTOM"
+                                            ]
+                                        },
+                                        "script": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "description": ""
+                                                },
+                                                "script": {
+                                                    "type": "string",
+                                                    "description": ""
+                                                }
+                                            },
+                                            "description": ""
+                                        },
+                                        "tcPoServerStart": {
+                                            "type": "object",
+                                            "properties": {
+                                                "port": {
+                                                    "type": "integer",
+                                                    "description": ""
+                                                },
+                                                "server": {
+                                                    "type": "object",
+                                                    "properties": {},
+                                                    "description": ""
+                                                },
+                                                "vertx": {
+                                                    "type": "object",
+                                                    "properties": {},
+                                                    "description": ""
+                                                },
+                                                "tcpoConnectManage": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "vertx": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "description": ""
+                                                        },
+                                                        "tcpoPayloadProcess": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "applicationContext": {
+                                                                    "type": "object",
+                                                                    "properties": {},
+                                                                    "description": ""
+                                                                },
+                                                                "classManager": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "applicationContext": {
+                                                                            "type": "object",
+                                                                            "properties": {},
+                                                                            "description": ""
+                                                                        }
+                                                                    },
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": ""
+                                                        },
+                                                        "bufferProcessMode": {
+                                                            "type": "string",
+                                                            "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                                            "default": "BufferProcessMode.DELIMITED",
+                                                            "enum": [
+                                                                "DELIMITED",
+                                                                "FIXED_LENGTH",
+                                                                "CUSTOM"
+                                                            ]
+                                                        },
+                                                        "script": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "script": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": "脚本，仅在CUSTOM模式中用"
+                                                        }
+                                                    },
+                                                    "description": ""
+                                                },
+                                                "bufferProcessMode": {
+                                                    "type": "string",
+                                                    "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                                    "enum": [
+                                                        "DELIMITED",
+                                                        "FIXED_LENGTH",
+                                                        "CUSTOM"
+                                                    ]
+                                                },
+                                                "script": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "description": ""
+                                                        },
+                                                        "script": {
+                                                            "type": "string",
+                                                            "description": ""
+                                                        }
+                                                    },
+                                                    "description": ""
+                                                }
+                                            },
+                                            "description": ""
+                                        }
+                                    },
+                                    "description": ""
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/server/getAllTypes": {
+                "get": {
+                    "summary": "getAllTypes",
+                    "description": "getAllTypes",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/server/getAllPortsOpened": {
+                "get": {
+                    "summary": "getAllPortsOpneed",
+                    "description": "getAllPortsOpneed",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "port": {
+                                                                    "type": "integer",
+                                                                    "description": ""
+                                                                },
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "bufferProcessMode": {
+                                                                    "type": "string",
+                                                                    "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                                                    "enum": [
+                                                                        "DELIMITED",
+                                                                        "FIXED_LENGTH",
+                                                                        "CUSTOM"
+                                                                    ]
+                                                                },
+                                                                "script": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "type": "string",
+                                                                            "description": ""
+                                                                        },
+                                                                        "script": {
+                                                                            "type": "string",
+                                                                            "description": ""
+                                                                        }
+                                                                    },
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": "com.fastop.devicecontrollercore.service.util.ServerSupport.PortDetail"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/server/getExamplePortDetail": {
+                "get": {
+                    "summary": "getExamplePortDetail",
+                    "description": "getExamplePortDetail",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "port": {
+                                                                "type": "integer",
+                                                                "description": ""
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "bufferProcessMode": {
+                                                                "type": "string",
+                                                                "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                                                "enum": [
+                                                                    "DELIMITED",
+                                                                    "FIXED_LENGTH",
+                                                                    "CUSTOM"
+                                                                ]
+                                                            },
+                                                            "script": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "type": "string",
+                                                                        "description": ""
+                                                                    },
+                                                                    "script": {
+                                                                        "type": "string",
+                                                                        "description": ""
+                                                                    }
+                                                                },
+                                                                "description": ""
+                                                            }
+                                                        },
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/deviceControl/getAllDevices": {
+                "get": {
+                    "summary": "getAllDevices",
+                    "description": "getAllDevices",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "description": "",
+                                                                    "format": "int64"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "deviceIdentifier": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "createTime": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "location": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": "com.fastop.devicecontrollerentity.entity.Device"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/deviceControl/getAllDeviceTypes": {
+                "get": {
+                    "summary": "getAllDeviceTypes",
+                    "description": "getAllDeviceTypes",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/deviceControl/getDevicesByType": {
+                "get": {
+                    "summary": "getDevicesByType",
+                    "description": "getDevicesByType",
+                    "parameters": [
+                        {
+                            "name": "type",
+                            "in": "query",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string",
+                                "nullable": false
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "description": "",
+                                                                    "format": "int64"
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "deviceIdentifier": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "createTime": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "location": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": "com.fastop.devicecontrollerentity.entity.Device"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/deviceControl/getTemplateDeviceByType": {
+                "get": {
+                    "summary": "getTemplateDeviceByType",
+                    "description": "getTemplateDeviceByType",
+                    "parameters": [
+                        {
+                            "name": "type",
+                            "in": "query",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string",
+                                "nullable": false
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "description": "",
+                                                                "format": "int64"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "deviceIdentifier": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "createTime": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "location": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            }
+                                                        },
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/deviceControl/createNewDeviceByType": {
+                "post": {
+                    "summary": "createNewDeviceByType",
+                    "description": "createNewDeviceByType",
+                    "requestBody": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "description": "",
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/deviceControl/deleteDeviceByTypeAndId/{type}/{id}": {
+                "delete": {
+                    "summary": "deleteDeviceByTypeAndId",
+                    "description": "deleteDeviceByTypeAndId",
+                    "parameters": [
+                        {
+                            "name": "type",
+                            "in": "path",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "id",
+                            "in": "path",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "integer"
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/upload": {
+                "post": {
+                    "summary": "upload",
+                    "description": "upload",
+                    "requestBody": {
+                        "content": {
+                            "multipart/form-data": {
+                                "schema": {
+                                    "required": [
+                                        "files"
+                                    ],
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "format": "int64",
+                                            "nullable": false
+                                        },
+                                        "protocolName": {
+                                            "type": "string",
+                                            "nullable": false
+                                        },
+                                        "protocolVersion": {
+                                            "type": "string",
+                                            "nullable": false
+                                        },
+                                        "jarNames": {
+                                            "type": "array",
+                                            "nullable": false,
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "jarVersions": {
+                                            "type": "array",
+                                            "nullable": false,
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "jarFileNames": {
+                                            "type": "array",
+                                            "nullable": false,
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "jarEnabled": {
+                                            "type": "array",
+                                            "nullable": false,
+                                            "items": {
+                                                "type": "boolean"
+                                            }
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "nullable": false
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "nullable": false
+                                        },
+                                        "enabled": {
+                                            "type": "boolean",
+                                            "nullable": false
+                                        },
+                                        "creator": {
+                                            "type": "string",
+                                            "nullable": false
+                                        },
+                                        "creationTime": {
+                                            "type": "string",
+                                            "nullable": false
+                                        },
+                                        "modifier": {
+                                            "type": "string",
+                                            "nullable": false
+                                        },
+                                        "modificationTime": {
+                                            "type": "string",
+                                            "nullable": false
+                                        },
+                                        "files": {
+                                            "type": "string",
+                                            "description": "",
+                                            "format": "binary"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "required": true
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/load": {
+                "post": {
+                    "summary": "load",
+                    "description": "load",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/updateProtocol": {
+                "put": {
+                    "summary": "updateProtocol",
+                    "description": "updateProtocol",
+                    "requestBody": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "description": "",
+                                            "format": "int64"
+                                        },
+                                        "protocolName": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "protocolVersion": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "jarNames": {
+                                            "type": "array",
+                                            "description": "",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "jarVersions": {
+                                            "type": "array",
+                                            "description": "",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "jarFileNames": {
+                                            "type": "array",
+                                            "description": "",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "jarEnabled": {
+                                            "type": "array",
+                                            "description": "",
+                                            "items": {
+                                                "type": "boolean"
+                                            }
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "enabled": {
+                                            "type": "boolean",
+                                            "description": ""
+                                        },
+                                        "creator": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "creationTime": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "modifier": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "modificationTime": {
+                                            "type": "string",
+                                            "description": ""
+                                        }
+                                    },
+                                    "description": ""
+                                }
+                            }
+                        }
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/deleteProtocol/{protocolName}/{protocolVersion}": {
+                "delete": {
+                    "summary": "deleteProtocol",
+                    "description": "deleteProtocol",
+                    "parameters": [
+                        {
+                            "name": "protocolName",
+                            "in": "path",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "protocolVersion",
+                            "in": "path",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/loadProtocol/{protocolName}/{protocolVersion}": {
+                "post": {
+                    "summary": "loadProtocol",
+                    "description": "loadProtocol",
+                    "parameters": [
+                        {
+                            "name": "protocolName",
+                            "in": "path",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "protocolVersion",
+                            "in": "path",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/getProtocols": {
+                "get": {
+                    "summary": "getProtocols",
+                    "description": "getProtocols",
+                    "parameters": [
+                        {
+                            "name": "protocolName",
+                            "in": "query",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string",
+                                "nullable": false
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "description": "",
+                                                                    "format": "int64"
+                                                                },
+                                                                "protocolName": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "protocolVersion": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "jarNames": {
+                                                                    "type": "array",
+                                                                    "description": "",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "jarVersions": {
+                                                                    "type": "array",
+                                                                    "description": "",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "jarFileNames": {
+                                                                    "type": "array",
+                                                                    "description": "",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "jarEnabled": {
+                                                                    "type": "array",
+                                                                    "description": "",
+                                                                    "items": {
+                                                                        "type": "boolean"
+                                                                    }
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "enabled": {
+                                                                    "type": "boolean",
+                                                                    "description": ""
+                                                                },
+                                                                "creator": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "creationTime": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "modifier": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "modificationTime": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": "com.fastop.devicecontrollercore.core.jarloader.entity.JarProtocolEntity"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/getAllProtocols": {
+                "get": {
+                    "summary": "getAllProtocols",
+                    "description": "getAllProtocols",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "description": "",
+                                                                    "format": "int64"
+                                                                },
+                                                                "protocolName": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "protocolVersion": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "jarNames": {
+                                                                    "type": "array",
+                                                                    "description": "",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "jarVersions": {
+                                                                    "type": "array",
+                                                                    "description": "",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "jarFileNames": {
+                                                                    "type": "array",
+                                                                    "description": "",
+                                                                    "items": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "jarEnabled": {
+                                                                    "type": "array",
+                                                                    "description": "",
+                                                                    "items": {
+                                                                        "type": "boolean"
+                                                                    }
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "enabled": {
+                                                                    "type": "boolean",
+                                                                    "description": ""
+                                                                },
+                                                                "creator": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "creationTime": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "modifier": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "modificationTime": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": "com.fastop.devicecontrollercore.core.jarloader.entity.JarProtocolEntity"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/getExampleProtocol": {
+                "get": {
+                    "summary": "getExampleProtocol",
+                    "description": "getExampleProtocol",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "description": "",
+                                                                "format": "int64"
+                                                            },
+                                                            "protocolName": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "protocolVersion": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "jarNames": {
+                                                                "type": "array",
+                                                                "description": "",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "jarVersions": {
+                                                                "type": "array",
+                                                                "description": "",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "jarFileNames": {
+                                                                "type": "array",
+                                                                "description": "",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "jarEnabled": {
+                                                                "type": "array",
+                                                                "description": "",
+                                                                "items": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "enabled": {
+                                                                "type": "boolean",
+                                                                "description": ""
+                                                            },
+                                                            "creator": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "creationTime": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "modifier": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "modificationTime": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            }
+                                                        },
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/jar/getAllKeysSupport": {
+                "get": {
+                    "summary": "getAllKeysSupport",
+                    "description": "getAllKeysSupport",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/message/getAllMessages": {
+                "get": {
+                    "summary": "getAllMessages",
+                    "description": "getAllMessages",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "description": "",
+                                                                    "format": "int64"
+                                                                },
+                                                                "deviceIdentifier": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "createTime": {
+                                                                    "type": "string",
+                                                                    "description": "产生这条消息的时间，不一定是接收到这条消息的时间"
+                                                                },
+                                                                "receiveTime": {
+                                                                    "type": "string",
+                                                                    "description": "接收到这条消息的时间"
+                                                                },
+                                                                "location": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "content": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": "com.fastop.devicecontrollerentity.entity.Message"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/message/getMessagesByDeviceIdentifier": {
+                "get": {
+                    "summary": "getMessagesByDeviceIdentifier",
+                    "description": "getMessagesByDeviceIdentifier",
+                    "parameters": [
+                        {
+                            "name": "deviceIdentifier",
+                            "in": "query",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string",
+                                "nullable": false
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "description": "",
+                                                                    "format": "int64"
+                                                                },
+                                                                "deviceIdentifier": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "createTime": {
+                                                                    "type": "string",
+                                                                    "description": "产生这条消息的时间，不一定是接收到这条消息的时间"
+                                                                },
+                                                                "receiveTime": {
+                                                                    "type": "string",
+                                                                    "description": "接收到这条消息的时间"
+                                                                },
+                                                                "location": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                },
+                                                                "content": {
+                                                                    "type": "string",
+                                                                    "description": ""
+                                                                }
+                                                            },
+                                                            "description": "com.fastop.devicecontrollerentity.entity.Message"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/message/getExampleMessageByType": {
+                "get": {
+                    "summary": "getExampleMessageByType",
+                    "description": "getExampleMessageByType",
+                    "parameters": [
+                        {
+                            "name": "type",
+                            "in": "query",
+                            "description": "",
+                            "required": true,
+                            "schema": {
+                                "type": "string",
+                                "nullable": false
+                            }
+                        }
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "description": "",
+                                                                "format": "int64"
+                                                            },
+                                                            "deviceIdentifier": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "createTime": {
+                                                                "type": "string",
+                                                                "description": "产生这条消息的时间，不一定是接收到这条消息的时间"
+                                                            },
+                                                            "receiveTime": {
+                                                                "type": "string",
+                                                                "description": "接收到这条消息的时间"
+                                                            },
+                                                            "location": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            },
+                                                            "content": {
+                                                                "type": "string",
+                                                                "description": ""
+                                                            }
+                                                        },
+                                                        "description": ""
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "/message/getAllTypes": {
+                "get": {
+                    "summary": "getAllTypes",
+                    "description": "getAllTypes",
+                    "responses": {
+                        "200": {
+                            "description": "",
+                            "content": {
+                                "application/json": {
+                                    "schema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "headers": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "key": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": ""
+                                            },
+                                            "body": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "integer",
+                                                        "description": ""
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "description": ""
+                                                    },
+                                                    "data": {
+                                                        "type": "array",
+                                                        "description": "",
+                                                        "items": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                },
+                                                "description": "",
+                                                "nullable": true
+                                            },
+                                            "status": {
+                                                "type": "object",
+                                                "properties": {},
+                                                "description": ""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "components": {
+            "schemas": {
+                "org.springframework.http.HttpHeaders": {
+                    "type": "object",
+                    "properties": {
+                        "key": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "description": ""
+                },
+                "org.springframework.http.HttpStatusCode": {
+                    "type": "object",
+                    "properties": {},
+                    "description": ""
+                },
+                "com.fastop.devicecontrollercore.core.transport.tcp.TCPo.util.Jsr223ScriptExecutor.Script": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "script": {
+                            "type": "string",
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                },
+                "io.vertx.core.net.NetServer": {
+                    "type": "object",
+                    "properties": {},
+                    "description": ""
+                },
+                "io.vertx.core.Vertx": {
+                    "type": "object",
+                    "properties": {},
+                    "description": ""
+                },
+                "org.springframework.context.ApplicationContext": {
+                    "type": "object",
+                    "properties": {},
+                    "description": ""
+                },
+                "com.fastop.devicecontrollercore.manager.ClassManager": {
+                    "type": "object",
+                    "properties": {
+                        "applicationContext": {
+                            "type": "object",
+                            "properties": {},
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                },
+                "com.fastop.devicecontrollercore.core.transport.tcp.TCPo.TCPoPayloadProcess": {
+                    "type": "object",
+                    "properties": {
+                        "applicationContext": {
+                            "type": "object",
+                            "properties": {},
+                            "description": ""
+                        },
+                        "classManager": {
+                            "type": "object",
+                            "properties": {
+                                "applicationContext": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "description": ""
+                                }
+                            },
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                },
+                "com.fastop.devicecontrollercore.core.transport.tcp.TCPo.TCPoConnectManage": {
+                    "type": "object",
+                    "properties": {
+                        "vertx": {
+                            "type": "object",
+                            "properties": {},
+                            "description": ""
+                        },
+                        "tcpoPayloadProcess": {
+                            "type": "object",
+                            "properties": {
+                                "applicationContext": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "description": ""
+                                },
+                                "classManager": {
+                                    "type": "object",
+                                    "properties": {
+                                        "applicationContext": {
+                                            "type": "object",
+                                            "properties": {},
+                                            "description": ""
+                                        }
+                                    },
+                                    "description": ""
+                                }
+                            },
+                            "description": ""
+                        },
+                        "bufferProcessMode": {
+                            "type": "string",
+                            "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                            "default": "BufferProcessMode.DELIMITED",
+                            "enum": [
+                                "DELIMITED",
+                                "FIXED_LENGTH",
+                                "CUSTOM"
+                            ]
+                        },
+                        "script": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": ""
+                                },
+                                "script": {
+                                    "type": "string",
+                                    "description": ""
+                                }
+                            },
+                            "description": "脚本，仅在CUSTOM模式中用"
+                        }
+                    },
+                    "description": ""
+                },
+                "com.fastop.devicecontrollercore.core.transport.tcp.TCPo.TCPoServerStart": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer",
+                            "description": ""
+                        },
+                        "server": {
+                            "type": "object",
+                            "properties": {},
+                            "description": ""
+                        },
+                        "vertx": {
+                            "type": "object",
+                            "properties": {},
+                            "description": ""
+                        },
+                        "tcpoConnectManage": {
+                            "type": "object",
+                            "properties": {
+                                "vertx": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "description": ""
+                                },
+                                "tcpoPayloadProcess": {
+                                    "type": "object",
+                                    "properties": {
+                                        "applicationContext": {
+                                            "type": "object",
+                                            "properties": {},
+                                            "description": ""
+                                        },
+                                        "classManager": {
+                                            "type": "object",
+                                            "properties": {
+                                                "applicationContext": {
+                                                    "type": "object",
+                                                    "properties": {},
+                                                    "description": ""
+                                                }
+                                            },
+                                            "description": ""
+                                        }
+                                    },
+                                    "description": ""
+                                },
+                                "bufferProcessMode": {
+                                    "type": "string",
+                                    "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                    "default": "BufferProcessMode.DELIMITED",
+                                    "enum": [
+                                        "DELIMITED",
+                                        "FIXED_LENGTH",
+                                        "CUSTOM"
+                                    ]
+                                },
+                                "script": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "script": {
+                                            "type": "string",
+                                            "description": ""
+                                        }
+                                    },
+                                    "description": "脚本，仅在CUSTOM模式中用"
+                                }
+                            },
+                            "description": ""
+                        },
+                        "bufferProcessMode": {
+                            "type": "string",
+                            "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                            "enum": [
+                                "DELIMITED",
+                                "FIXED_LENGTH",
+                                "CUSTOM"
+                            ]
+                        },
+                        "script": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": ""
+                                },
+                                "script": {
+                                    "type": "string",
+                                    "description": ""
+                                }
+                            },
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                },
+                "com.fastop.devicecontrollercore.core.transport.tcp.TCPo.entity.TCPoServerStartEntity": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer",
+                            "description": ""
+                        },
+                        "enabled": {
+                            "type": "boolean",
+                            "description": ""
+                        },
+                        "bufferProcessMode": {
+                            "type": "string",
+                            "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                            "enum": [
+                                "DELIMITED",
+                                "FIXED_LENGTH",
+                                "CUSTOM"
+                            ]
+                        },
+                        "script": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": ""
+                                },
+                                "script": {
+                                    "type": "string",
+                                    "description": ""
+                                }
+                            },
+                            "description": ""
+                        },
+                        "tcPoServerStart": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "type": "integer",
+                                    "description": ""
+                                },
+                                "server": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "description": ""
+                                },
+                                "vertx": {
+                                    "type": "object",
+                                    "properties": {},
+                                    "description": ""
+                                },
+                                "tcpoConnectManage": {
+                                    "type": "object",
+                                    "properties": {
+                                        "vertx": {
+                                            "type": "object",
+                                            "properties": {},
+                                            "description": ""
+                                        },
+                                        "tcpoPayloadProcess": {
+                                            "type": "object",
+                                            "properties": {
+                                                "applicationContext": {
+                                                    "type": "object",
+                                                    "properties": {},
+                                                    "description": ""
+                                                },
+                                                "classManager": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "applicationContext": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "description": ""
+                                                        }
+                                                    },
+                                                    "description": ""
+                                                }
+                                            },
+                                            "description": ""
+                                        },
+                                        "bufferProcessMode": {
+                                            "type": "string",
+                                            "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                            "default": "BufferProcessMode.DELIMITED",
+                                            "enum": [
+                                                "DELIMITED",
+                                                "FIXED_LENGTH",
+                                                "CUSTOM"
+                                            ]
+                                        },
+                                        "script": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "description": ""
+                                                },
+                                                "script": {
+                                                    "type": "string",
+                                                    "description": ""
+                                                }
+                                            },
+                                            "description": "脚本，仅在CUSTOM模式中用"
+                                        }
+                                    },
+                                    "description": ""
+                                },
+                                "bufferProcessMode": {
+                                    "type": "string",
+                                    "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                                    "enum": [
+                                        "DELIMITED",
+                                        "FIXED_LENGTH",
+                                        "CUSTOM"
+                                    ]
+                                },
+                                "script": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "description": ""
+                                        },
+                                        "script": {
+                                            "type": "string",
+                                            "description": ""
+                                        }
+                                    },
+                                    "description": ""
+                                }
+                            },
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                },
+                "com.fastop.devicecontrollercore.service.util.ServerSupport.PortDetail": {
+                    "type": "object",
+                    "properties": {
+                        "port": {
+                            "type": "integer",
+                            "description": ""
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "bufferProcessMode": {
+                            "type": "string",
+                            "description": "{DELIMITED=DELIMITED, FIXED_LENGTH=FIXED_LENGTH, CUSTOM=使用脚本配置}",
+                            "enum": [
+                                "DELIMITED",
+                                "FIXED_LENGTH",
+                                "CUSTOM"
+                            ]
+                        },
+                        "script": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": ""
+                                },
+                                "script": {
+                                    "type": "string",
+                                    "description": ""
+                                }
+                            },
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                },
+                "com.fastop.devicecontrollerentity.entity.Device": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "",
+                            "format": "int64"
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "deviceIdentifier": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "createTime": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "location": {
+                            "type": "string",
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                },
+                "com.fastop.devicecontrollercore.core.jarloader.entity.JarProtocolEntity": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "",
+                            "format": "int64"
+                        },
+                        "protocolName": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "protocolVersion": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "jarNames": {
+                            "type": "array",
+                            "description": "",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "jarVersions": {
+                            "type": "array",
+                            "description": "",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "jarFileNames": {
+                            "type": "array",
+                            "description": "",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "jarEnabled": {
+                            "type": "array",
+                            "description": "",
+                            "items": {
+                                "type": "boolean"
+                            }
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "enabled": {
+                            "type": "boolean",
+                            "description": ""
+                        },
+                        "creator": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "creationTime": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "modifier": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "modificationTime": {
+                            "type": "string",
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                },
+                "com.fastop.devicecontrollerentity.entity.Message": {
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "",
+                            "format": "int64"
+                        },
+                        "deviceIdentifier": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "createTime": {
+                            "type": "string",
+                            "description": "产生这条消息的时间，不一定是接收到这条消息的时间"
+                        },
+                        "receiveTime": {
+                            "type": "string",
+                            "description": "接收到这条消息的时间"
+                        },
+                        "location": {
+                            "type": "string",
+                            "description": ""
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": ""
+                        }
+                    },
+                    "description": ""
+                }
+            }
+        }
+    },
+    "version": "0.0.1-SNAPSHOT",
+    "url": "http://localhost:19999"
+}
