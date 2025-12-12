@@ -15,6 +15,8 @@
             <th>版本</th>
             <th>说明</th>
             <th>类型</th>
+            <th>创建时间</th>
+            <th>更新时间</th>
             <th>状态</th>
             <th>操作</th>
           </tr>
@@ -25,6 +27,8 @@
             <td>{{ protocol.protocolVersion }}</td>
             <td>{{ protocol.description }}</td>
             <td>{{ protocol.type }}</td>
+            <td>{{ protocol.creationTime }}</td>
+            <td>{{ protocol.modificationTime }}</td>
             <td>
               <span :class="protocol.enabled ? 'status-enabled' : 'status-disabled'">
                 {{ protocol.enabled ? '已启用' : '未启用' }}
@@ -37,7 +41,7 @@
             </td>
           </tr>
           <tr v-if="protocols.length === 0">
-            <td colspan="6" class="no-data">没有找到协议。</td>
+            <td colspan="8" class="no-data">没有找到协议。</td>
           </tr>
         </tbody>
       </table>
@@ -73,18 +77,13 @@
                 是否启用
               </label>
             </div>
-            
-            <div class="form-group">
-              <label for="files-upload">上传文件:</label>
-              <input type="file" id="files-upload" multiple @change="handleFileChange" />
-            </div>
 
             <div class="jar-files-panel">
               <h5>JAR 包信息:</h5>
               <table>
                 <thead>
                   <tr>
-                    <th>文件名</th>
+                    <th>文件</th>
                     <th>名称</th>
                     <th>版本</th>
                     <th>启用</th>
@@ -93,7 +92,19 @@
                 </thead>
                 <tbody>
                   <tr v-for="(jar, index) in newProtocol.jarFileNames" :key="index">
-                    <td>{{ newProtocol.jarFileNames[index] }}</td>
+                                        <td>
+                      <span v-if="newProtocol.jarFileNames[index]">{{ newProtocol.jarFileNames[index] }}</span>
+                      <input 
+                        type="file" 
+                        :ref="el => fileInputs[index] = el" 
+                        style="display: none;" 
+                        accept=".jar"
+                        @change="handleSingleFileChange($event, index)"
+                      />
+                      <button type="button" @click="triggerFileInput(index)" class="single-upload-btn">
+                        {{ newProtocol.jarFileNames[index] ? '更改' : '上传文件' }}
+                      </button>
+                    </td>
                     <td><input type="text" v-model="newProtocol.jarNames[index]" required /></td>
                     <td><input type="text" v-model="newProtocol.jarVersions[index]" required /></td>
                     <td><input type="checkbox" v-model="newProtocol.jarEnabled[index]" /></td>
@@ -171,7 +182,7 @@
       </div>
     </div>
 
-    <div v-if="showMessageModal" class="modal-overlay">
+    <div v-if="showMessageModal" class="modal-overlay top-level-overlay">
       <div class="modal message-modal">
         <div class="modal-header">
           <h4>{{ messageTitle }}</h4>
@@ -187,7 +198,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, nextTick } from 'vue';
 import axios from 'axios';
 import config from '../config/config';
 
@@ -196,7 +207,9 @@ const showUploadModal = ref(false);
 const showUpdateModal = ref(false);
 const newProtocol = ref({});
 const selectedProtocol = ref(null);
-const filesToUpload = ref([]);
+// filesToUpload 现在只用于存储实际选择的文件对象。文件名列表由 newProtocol.jarFileNames 维护。
+const filesToUpload = ref([]); 
+const fileInputs = ref([]);    
 
 // 新增消息模态窗口状态
 const showMessageModal = ref(false);
@@ -205,303 +218,371 @@ const messageContent = ref('');
 
 const BASE_URL = config.BASE_URL+'/jar';
 const API_USER = 'admin';
-const SUCCESS_CODE = 200; // 假设后端业务成功码是 200
+const SUCCESS_CODE = 200; 
 
-// Computed property to validate upload form
+// 【修改 3】Computed property to validate upload form
 const isUploadFormValid = computed(() => {
-  return newProtocol.value.protocolName && newProtocol.value.protocolVersion && newProtocol.value.type;
+  // 1. 检查核心信息是否填写
+  const coreValid = newProtocol.value.protocolName && 
+                    newProtocol.value.protocolVersion && 
+                    newProtocol.value.type;
+
+  if (!coreValid) return false;
+
+  // 2. 检查 jar 文件列表是否为空
+  const jarList = newProtocol.value.jarFileNames || [];
+  if (jarList.length === 0) return true; // 如果列表为空，且核心信息有效，则允许上传
+
+  // 3. 如果列表不为空，确保 filesToUpload 包含了列表中所有的文件名
+  const uploadedFileNames = filesToUpload.value.map(f => f.name);
+  return jarList.every(fileName => uploadedFileNames.includes(fileName));
 });
 
 // Computed property to validate update form
 const isUpdateFormValid = computed(() => {
-  return selectedProtocol.value && selectedProtocol.value.protocolName && selectedProtocol.value.protocolVersion && selectedProtocol.value.type;
+  return selectedProtocol.value && 
+         selectedProtocol.value.protocolName && 
+         selectedProtocol.value.protocolVersion && 
+         selectedProtocol.value.type;
 });
 
-// Helper function to format date
-const formatDateTime = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-  // 匹配后端的 LocalDateTime 格式
-  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
-};
+// 【移除 4】不再使用 formatDateTime 函数
 
 // 通用消息模态窗口函数
-const showMessage = (title, content) => {
-  messageTitle.value = title;
-  messageContent.value = content;
-  showMessageModal.value = true;
+const showMessage = (title, content, callback = null) => {
+  messageTitle.value = title;
+  messageContent.value = content;
+  showMessageModal.value = true;
+  if (callback) {
+    // 可以在这里添加一个确认/取消的逻辑，但为了简洁，暂时只提供展示
+    console.log("确认回调暂未实现完整确认框，请使用原生确认。");
+  }
 };
 
 const closeMessageModal = () => {
-  showMessageModal.value = false;
-  messageTitle.value = '';
-  messageContent.value = '';
+  showMessageModal.value = false;
+  messageTitle.value = '';
+  messageContent.value = '';
 };
 
 
 // ------------------------------------ API 调用 ------------------------------------
 
-/**
- * 【更新】获取所有协议
- */
+// fetchProtocols, fetchExampleProtocol, openUploadModal, closeUploadModal 保持不变
+
 const fetchProtocols = async () => {
-  try {
-    // 接口为 /getAllProtocols
-    const response = await axios.get(`${BASE_URL}/getAllProtocols`);
-    
-    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-      protocols.value = response.data.data || [];
-    } else {
-      console.error('获取协议列表失败:', response.data.message);
-      protocols.value = [];
-      showMessage('错误', response.data.message || '获取协议列表失败，请检查网络或服务器状态。');
-    }
-  } catch (error) {
-    console.error('获取协议列表请求失败:', error);
-    protocols.value = [];
-    showMessage('错误', '获取协议列表失败，请检查网络或服务器状态。');
-  }
+  try {
+    const response = await axios.get(`${BASE_URL}/getAllProtocols`);
+    
+    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+      protocols.value = response.data.data || [];
+    } else {
+      console.error('获取协议列表失败:', response.data.message);
+      protocols.value = [];
+      showMessage('错误', response.data.message || '获取协议列表失败，请检查网络或服务器状态。');
+    }
+  } catch (error) {
+    console.error('获取协议列表请求失败:', error);
+    protocols.value = [];
+    showMessage('错误', '获取协议列表失败，请检查网络或服务器状态。');
+  }
 };
 
-/**
- * 【更新】获取协议模板
- */
 const fetchExampleProtocol = async () => {
-  try {
-    const response = await axios.get(`${BASE_URL}/getExampleProtocol`);
-    
-    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-      const template = response.data.data;
-      // 初始化字段
-      template.id = null;
-      template.jarNames = template.jarNames || [''];
-      template.jarVersions = template.jarVersions || [''];
-      template.jarFileNames = template.jarFileNames || [''];
-      template.jarEnabled = template.jarEnabled || [true];
-      newProtocol.value = template;
-    } else {
-      console.error('获取协议模板失败:', response.data.message);
-      showMessage('错误', response.data.message || '获取协议模板失败。');
-    }
-  } catch (error) {
-    console.error('获取协议模板失败:', error);
-    showMessage('错误', '获取协议模板失败，请检查网络。');
-  }
+  try {
+    const response = await axios.get(`${BASE_URL}/getExampleProtocol`);
+    
+    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+      const template = response.data.data;
+      template.id = null;
+      // 初始化空数组以启动上传流程
+      template.jarNames = [];
+      template.jarVersions = [];
+      template.jarFileNames = [];
+      template.jarEnabled = []; 
+      template.enabled = true; 
+      newProtocol.value = template;
+      filesToUpload.value = []; 
+      fileInputs.value = [];    
+    } else {
+      console.error('获取协议模板失败:', response.data.message);
+      showMessage('错误', response.data.message || '获取协议模板失败。');
+    }
+  } catch (error) {
+    console.error('获取协议模板失败:', error);
+    showMessage('错误', '获取协议模板失败，请检查网络。');
+  }
 };
 
-// 打开上传模态窗口
 const openUploadModal = async () => {
-  await fetchExampleProtocol();
-  showUploadModal.value = true;
+  await fetchExampleProtocol();
+  showUploadModal.value = true;
 };
 
-// 关闭上传模态窗口
 const closeUploadModal = () => {
-  showUploadModal.value = false;
-  filesToUpload.value = [];
-};
-
-// 处理文件选择
-const handleFileChange = (event) => {
-  filesToUpload.value = Array.from(event.target.files);
-  // 将选择的文件名按顺序添加到 jarFileNames 数组中
-  newProtocol.value.jarFileNames = filesToUpload.value.map(file => file.name);
-  // 确保其他 jar 相关的数组长度匹配
-  newProtocol.value.jarNames = newProtocol.value.jarFileNames.map(() => '');
-  newProtocol.value.jarVersions = newProtocol.value.jarFileNames.map(() => '');
-  newProtocol.value.jarEnabled = newProtocol.value.jarFileNames.map(() => true);
+  showUploadModal.value = false;
+  filesToUpload.value = [];
+  fileInputs.value = [];
 };
 
 /**
- * 【更新】提交上传协议 (Multipart/form-data 结构化)
- */
-const submitUpload = async () => {
-  if (!isUploadFormValid.value || filesToUpload.value.length === 0) {
-    showMessage('提示', '请填写所有必填字段并上传至少一个文件。');
-    return;
-  }
-  
-  // 准备协议详情对象
-  const protocolData = {
-    ...newProtocol.value,
-    creator: API_USER,
-    creationTime: formatDateTime(),
-    modifier: API_USER,
-    modificationTime: formatDateTime(),
-  };
-  
-  const formData = new FormData();
-  
-  // 关键：将协议详情作为 Blob 对象上传，并指定 Content-Type 为 application/json
-  const protocolDetailBlob = new Blob([JSON.stringify(protocolData)], { type: 'application/json' });
-  formData.append('protocolDetail', protocolDetailBlob, 'protocolDetail.json'); 
-  
-  // 添加文件
-  filesToUpload.value.forEach(file => {
-    formData.append('files', file);
-  });
-  
-  try {
-    const response = await axios.post(`${BASE_URL}/upload`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data', // axios 会自动处理边界，这里可以省略，但为了明确写上
-      },
-    });
+ * 批量文件选择处理
+ */
+const handleFileChange = (event) => {
+  const selectedFiles = Array.from(event.target.files).filter(file => file.name.endsWith('.jar'));
+  if (selectedFiles.length === 0 && event.target.files.length > 0) {
+    showMessage('提示', '只允许上传 .jar 文件！');
+    event.target.value = null; 
+    return;
+  }
 
-    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-      showMessage('成功', '协议上传成功！');
-      closeUploadModal();
-      fetchProtocols();
-    } else {
-      console.error('协议上传失败:', response.data.message);
-      showMessage('失败', response.data.message || '协议上传失败：未知错误。');
-    }
-  } catch (error) {
-    console.error('上传协议请求失败:', error);
-    const errorMessage = error.response?.data?.message || '上传协议失败，请检查文件和网络。';
-    showMessage('上传失败', errorMessage);
-  }
+  filesToUpload.value = selectedFiles;
+  // 更新 JAR 信息列表
+  newProtocol.value.jarFileNames = selectedFiles.map(file => file.name);
+  newProtocol.value.jarNames = newProtocol.value.jarFileNames.map(() => '');
+  newProtocol.value.jarVersions = newProtocol.value.jarFileNames.map(() => '');
+  newProtocol.value.jarEnabled = newProtocol.value.jarFileNames.map(() => true); 
+  nextTick(() => {
+    fileInputs.value = newProtocol.value.jarFileNames.map(() => null); 
+  });
+};
+
+/**
+ * 单个文件上传处理
+ */
+const handleSingleFileChange = (event, index) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (!file.name.endsWith('.jar')) {
+    showMessage('提示', '只允许上传 .jar 文件！');
+    event.target.value = null;
+    return;
+  }
+
+  // 1. 移除旧文件 (如果有)
+  const oldFileName = newProtocol.value.jarFileNames[index];
+  filesToUpload.value = filesToUpload.value.filter(f => f.name !== oldFileName);
+
+  // 2. 添加新文件
+  filesToUpload.value.push(file);
+
+  // 3. 更新文件名数组
+  newProtocol.value.jarFileNames[index] = file.name;
+  
+  // 必须清空 input file 的值
+  event.target.value = null;
+};
+
+const triggerFileInput = (index) => {
+  if (fileInputs.value[index]) {
+    fileInputs.value[index].click();
+  }
+};
+
+/**
+ * 提交上传协议
+ */
+const submitUpload = async () => {
+  if (!isUploadFormValid.value) {
+    showMessage('提示', '请填写所有必填字段，并确保所有表格中的文件都已上传。');
+    return;
+  }
+  
+  // 准备协议详情对象
+  const protocolData = {
+    ...newProtocol.value,
+    // 【移除 4】移除 creator, creationTime, modifier, modificationTime
+  };
+  
+  const formData = new FormData();
+  
+  // 关键：将协议详情作为 Blob 对象上传
+  const protocolDetailBlob = new Blob([JSON.stringify(protocolData)], { type: 'application/json' });
+  formData.append('protocolDetail', protocolDetailBlob, 'protocolDetail.json'); 
+  
+  // 添加实际需要上传的文件
+  const jarFileNamesSet = new Set(newProtocol.value.jarFileNames);
+  filesToUpload.value.forEach(file => {
+    // 只有文件名存在于当前协议配置中的文件才上传
+    if (jarFileNamesSet.has(file.name)) {
+      formData.append('files', file);
+    }
+  });
+  
+  try {
+    const response = await axios.post(`${BASE_URL}/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+      showMessage('成功', '协议上传成功！');
+      closeUploadModal();
+      fetchProtocols();
+    } else {
+      console.error('协议上传失败:', response.data.message);
+      showMessage('失败', response.data.message || '协议上传失败：未知错误。');
+    }
+  } catch (error) {
+    console.error('上传协议请求失败:', error);
+    const errorMessage = error.response?.data?.message || '上传协议失败，请检查文件和网络。';
+    showMessage('上传失败', errorMessage);
+  }
 };
 
 // 动态表格 - 上传
 const addJarRow = () => {
-  newProtocol.value.jarFileNames.push('');
-  newProtocol.value.jarNames.push('');
-  newProtocol.value.jarVersions.push('');
-  newProtocol.value.jarEnabled.push(true);
+  // 默认启用
+  newProtocol.value.jarFileNames.push('');
+  newProtocol.value.jarNames.push('');
+  newProtocol.value.jarVersions.push('');
+  newProtocol.value.jarEnabled.push(true);
+  nextTick(() => {
+    fileInputs.value.push(null); 
+  });
 };
 
+// 【修改 3】动态表格 - 移除
 const removeJarRow = (index) => {
-  newProtocol.value.jarNames.splice(index, 1);
-  newProtocol.value.jarVersions.splice(index, 1);
-  newProtocol.value.jarFileNames.splice(index, 1);
-  newProtocol.value.jarEnabled.splice(index, 1);
+  // 移除文件对象（如果存在）
+  const fileName = newProtocol.value.jarFileNames[index];
+  if (fileName) {
+    // 从 filesToUpload 中移除对应文件
+    filesToUpload.value = filesToUpload.value.filter(f => f.name !== fileName);
+  }
+
+  newProtocol.value.jarNames.splice(index, 1);
+  newProtocol.value.jarVersions.splice(index, 1);
+  newProtocol.value.jarFileNames.splice(index, 1);
+  newProtocol.value.jarEnabled.splice(index, 1);
+  fileInputs.value.splice(index, 1);
 };
 
 
-// 打开修改协议模态窗口
+// openUpdateModal, closeUpdateModal 保持不变
+
 const openUpdateModal = (protocol) => {
-  selectedProtocol.value = { ...protocol };
-  // 确保数组存在且有默认值
-  selectedProtocol.value.jarNames = selectedProtocol.value.jarNames || [];
-  selectedProtocol.value.jarVersions = selectedProtocol.value.jarVersions || [];
-  selectedProtocol.value.jarFileNames = selectedProtocol.value.jarFileNames || [];
-  selectedProtocol.value.jarEnabled = selectedProtocol.value.jarEnabled || [];
-  showUpdateModal.value = true;
+  selectedProtocol.value = { ...protocol };
+  selectedProtocol.value.jarNames = selectedProtocol.value.jarNames || [];
+  selectedProtocol.value.jarVersions = selectedProtocol.value.jarVersions || [];
+  selectedProtocol.value.jarFileNames = selectedProtocol.value.jarFileNames || [];
+  selectedProtocol.value.jarEnabled = selectedProtocol.value.jarEnabled || [];
+  showUpdateModal.value = true;
 };
 
-// 关闭修改协议模态窗口
 const closeUpdateModal = () => {
-  showUpdateModal.value = false;
-  selectedProtocol.value = null;
+  showUpdateModal.value = false;
+  selectedProtocol.value = null;
 };
 
 /**
- * 【更新】提交修改协议
- */
+ * 提交修改协议
+ */
 const submitUpdate = async () => {
-  if (!isUpdateFormValid.value) {
-    showMessage('提示', '协议信息不完整，请检查必填字段。');
-    return;
-  }
+  if (!isUpdateFormValid.value) {
+    showMessage('提示', '协议信息不完整，请检查必填字段。');
+    return;
+  }
 
-  // 准备更新数据
-  const protocolToUpdate = {
-    ...selectedProtocol.value,
-    modifier: API_USER,
-    modificationTime: formatDateTime(),
-  };
+  const protocolToUpdate = {
+    ...selectedProtocol.value,
+    // 【移除 4】移除 modifier 和 modificationTime
+  };
 
-  try {
-    // 接口为 PUT
-    const response = await axios.put(`${BASE_URL}/updateProtocol`, protocolToUpdate, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  try {
+    const response = await axios.put(`${BASE_URL}/updateProtocol`, protocolToUpdate, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-      showMessage('成功', '协议信息更新成功！');
-      closeUpdateModal();
-      fetchProtocols();
-    } else {
-      console.error('协议信息更新失败:', response.data.message);
-      showMessage('失败', response.data.message || '协议信息更新失败：未知错误。');
-    }
-  } catch (error) {
-    console.error('更新协议请求失败:', error);
-    const errorMessage = error.response?.data?.message || '更新协议失败，请检查网络或服务器状态。';
-    showMessage('更新失败', errorMessage);
-  }
+    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+      showMessage('成功', '协议信息更新成功！');
+      closeUpdateModal();
+      fetchProtocols();
+    } else {
+      console.error('协议信息更新失败:', response.data.message);
+      showMessage('失败', response.data.message || '协议信息更新失败：未知错误。');
+    }
+  } catch (error) {
+    console.error('更新协议请求失败:', error);
+    const errorMessage = error.response?.data?.message || '更新协议失败，请检查网络或服务器状态。';
+    showMessage('更新失败', errorMessage);
+  }
 };
 
 
 // 确认并删除协议
 const confirmDelete = (protocol) => {
-  // 可以增加一个确认对话框，这里直接调用删除
-  deleteProtocol(protocol);
+  if (confirm(`您确定要删除协议 "${protocol.protocolName}" 版本 "${protocol.protocolVersion}" 吗？`)) {
+    deleteProtocol(protocol);
+  }
 };
 
 /**
- * 【更新】删除协议
- */
+ * 【修改 1】删除协议 - 确保 URL 和请求方法正确
+ */
 const deleteProtocol = async (protocol) => {
-  try {
-    const url = `${BASE_URL}/deleteProtocol/${protocol.protocolName}/${protocol.protocolVersion}`;
-    const response = await axios.delete(url);
-    
-    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-      showMessage('成功', '协议已成功删除！');
-      fetchProtocols();
-    } else {
-      console.error('删除协议失败:', response.data.message);
-      showMessage('失败', response.data.message || '删除协议失败：未知错误。');
-    }
-  } catch (error) {
-    console.error('删除协议请求失败:', error);
-    const errorMessage = error.response?.data?.message || '删除协议失败，请检查网络或服务器状态。';
-    showMessage('删除失败', errorMessage);
-  }
+  try {
+    // 确保 URL 编码
+    const protocolName = encodeURIComponent(protocol.protocolName);
+    const protocolVersion = encodeURIComponent(protocol.protocolVersion);
+    const url = `${BASE_URL}/deleteProtocol/${protocolName}/${protocolVersion}`;
+    
+    const response = await axios.delete(url);
+    
+    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+      showMessage('成功', '协议已成功删除！');
+      fetchProtocols();
+    } else {
+      console.error('删除协议失败:', response.data.message);
+      showMessage('失败', response.data.message || '删除协议失败：未知错误。');
+    }
+  } catch (error) {
+    console.log('删除协议请求对象:', error);
+    const errorMessage = error.response?.data?.message || '删除协议失败，请检查网络或服务器状态。';
+    showMessage('删除失败', errorMessage);
+  }
 };
 
 // 确认并重新加载协议
 const confirmLoad = (protocol) => {
-  // 可以增加一个确认对话框，这里直接调用加载
-  loadProtocol(protocol);
+  if (confirm(`您确定要重新加载协议 "${protocol.protocolName}" 版本 "${protocol.protocolVersion}" 吗？`)) {
+    loadProtocol(protocol);
+  }
 };
 
 /**
- * 【更新】重新加载协议
- */
+ * 重新加载协议
+ */
 const loadProtocol = async (protocol) => {
-  try {
-    const url = `${BASE_URL}/loadProtocol/${protocol.protocolName}/${protocol.protocolVersion}`;
-    // 接口为 POST
-    const response = await axios.post(url);
-    
-    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-      showMessage('成功', '协议已成功重新加载！');
-      fetchProtocols();
-    } else {
-      console.error('重新加载协议失败:', response.data.message);
-      showMessage('失败', response.data.message || '重新加载协议失败：未知错误。');
-    }
-  } catch (error) {
-    console.error('重新加载协议请求失败:', error);
-    const errorMessage = error.response?.data?.message || '重新加载协议失败，请检查网络或服务器状态。';
-    showMessage('重新加载失败', errorMessage);
-  }
+  try {
+    // 确保 URL 编码
+    const protocolName = encodeURIComponent(protocol.protocolName);
+    const protocolVersion = encodeURIComponent(protocol.protocolVersion);
+    const url = `${BASE_URL}/loadProtocol/${protocolName}/${protocolVersion}`;
+    
+    const response = await axios.post(url);
+    
+    if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+      showMessage('成功', '协议已成功重新加载！');
+      fetchProtocols();
+    } else {
+      console.error('重新加载协议失败:', response.data.message);
+      showMessage('失败', response.data.message || '重新加载协议失败：未知错误。');
+    }
+  } catch (error) {
+    console.error('重新加载协议请求失败:', error);
+    const errorMessage = error.response?.data?.message || '重新加载协议失败，请检查网络或服务器状态。';
+    showMessage('重新加载失败', errorMessage);
+  }
 };
 
 // 页面加载时自动获取所有协议
 onMounted(() => {
-  fetchProtocols();
+  fetchProtocols();
 });
 </script>
 
@@ -616,6 +697,11 @@ th {
   z-index: 1000;
 }
 
+/* 确保消息弹窗在最上层 */
+.modal-overlay.top-level-overlay {
+  z-index: 1010; 
+}
+
 .modal {
   background: white;
   padding: 20px;
@@ -671,6 +757,10 @@ th {
   margin-right: 8px;
 }
 
+.form-group input[type="file"] {
+  padding: 5px; 
+}
+
 .submit-btn {
   width: 100%;
   padding: 12px;
@@ -705,12 +795,13 @@ th {
   border: 1px solid #ddd;
 }
 
-.jar-files-panel table input {
+.jar-files-panel table input[type="text"] {
   width: 100%;
+  padding: 5px;
 }
 
 .jar-files-panel .add-jar-btn {
-  background-color: #6c757d;
+  background-color: #007bff;
   color: white;
   padding: 8px 12px;
   border: none;
@@ -719,7 +810,7 @@ th {
 }
 
 .jar-files-panel .add-jar-btn:hover {
-  background-color: #5a6268;
+  background-color: #0056b3;
 }
 
 .jar-files-panel .remove-jar-btn {
@@ -733,5 +824,19 @@ th {
 
 .jar-files-panel .remove-jar-btn:hover {
   background-color: #c82333;
+}
+
+.single-upload-btn {
+  background-color: #6c757d;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.single-upload-btn:hover {
+  background-color: #5a6268;
 }
 </style>

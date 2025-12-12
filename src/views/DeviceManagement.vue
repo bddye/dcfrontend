@@ -230,7 +230,7 @@ const BASE_URL = config.BASE_URL+'/deviceControl';
 const SUCCESS_CODE = 200; // 假设后端业务成功码是 200
 
 const showSimulatorModal = ref(false); // 模拟器主弹窗
-const simulatingDevice = ref(null);    // 当前正在操作的设备对象
+const simulatingDevice = ref(null);    // 当前正在操作的设备对象
 
 const simulatorForm = ref({
     // ⚠️ 使用 deviceId 替换 deviceIdentifier
@@ -241,7 +241,7 @@ const simulatorForm = ref({
     connectedPort: null,
     connectedType: '',
 
-    ip: '',   // 输入框的临时值
+    ip: '',   // 输入框的临时值
     port: null, // 输入框的临时值
     type: '', 
     // ❗ 【修改点 2】删除 topic 字段
