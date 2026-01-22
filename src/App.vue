@@ -4,26 +4,31 @@
     <div class="main-content">
       <router-view></router-view>
     </div>
+    <Notification />
   </div>
 </template>
 
 <script setup>
 import Sidebar from './components/Sidebar.vue';
+import Notification from './components/Notification.vue';
 </script>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
-
 #app-layout {
   display: flex;
+  min-height: 100vh;
 }
 
 .main-content {
-  margin-left: 250px;
-  padding: 20px;
-  width: 100%;
+  flex: 1;
+  margin-left: 240px; /* Matching sidebar width */
+  min-height: 100vh;
+  transition: margin-left 0.3s;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
 }
 </style>
