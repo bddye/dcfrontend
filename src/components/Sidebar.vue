@@ -1,16 +1,15 @@
 <template>
   <div class="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-logo">DC</div>
-      <div class="brand-name">Device Controller</div>
+    <div class="sidebar-logo">
+      <img src="/vite.svg" alt="logo" class="logo-img" />
+      <span class="logo-text">设备管理系统</span>
     </div>
 
     <nav class="sidebar-nav">
-      <div class="nav-section">管理菜单</div>
       <ul>
         <li>
           <router-link to="/device-management" class="nav-item">
-            <span class="nav-icon">📱</span>
+            <span class="nav-icon">📊</span>
             设备管理
           </router-link>
         </li>
@@ -39,57 +38,43 @@
 
 <style scoped>
 .sidebar {
-  width: 240px;
-  background-color: #1e293b;
-  color: #f8fafc;
+  width: 200px;
+  background-color: #001529;
+  color: rgba(255, 255, 255, 0.65);
   height: 100vh;
   position: fixed;
   top: 0;
   left: 0;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-  z-index: 40;
+  z-index: 100;
+  transition: all 0.2s;
 }
 
-.sidebar-brand {
-  padding: 1.5rem;
+.sidebar-logo {
+  height: 64px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 12px;
+  background: #002140;
 }
 
-.brand-logo {
+.logo-img {
   width: 32px;
   height: 32px;
-  background-color: var(--primary-color);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 0.875rem;
 }
 
-.brand-name {
-  font-weight: 700;
-  font-size: 1.125rem;
-  letter-spacing: -0.025em;
+.logo-text {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 1rem 0.75rem;
-}
-
-.nav-section {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: #94a3b8;
-  padding: 0.75rem 0.75rem 0.5rem;
-  letter-spacing: 0.05em;
+  padding: 16px 0;
 }
 
 ul {
@@ -101,19 +86,15 @@ ul {
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  color: #cbd5e1;
+  gap: 12px;
+  padding: 12px 24px;
+  color: rgba(255, 255, 255, 0.65);
   text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: all 0.2s;
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  transition: all 0.3s;
+  font-size: 14px;
 }
 
 .nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
   color: white;
 }
 
@@ -123,8 +104,6 @@ ul {
 }
 
 .nav-icon {
-  font-size: 1.25rem;
-  width: 24px;
-  text-align: center;
+  font-size: 16px;
 }
 </style>

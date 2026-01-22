@@ -1,8 +1,11 @@
 <template>
   <div id="app-layout">
     <Sidebar />
-    <div class="main-content">
-      <router-view></router-view>
+    <div class="main-wrapper">
+      <Topbar />
+      <main class="main-content">
+        <router-view></router-view>
+      </main>
     </div>
     <Notification />
   </div>
@@ -10,6 +13,7 @@
 
 <script setup>
 import Sidebar from './components/Sidebar.vue';
+import Topbar from './components/Topbar.vue';
 import Notification from './components/Notification.vue';
 </script>
 
@@ -17,18 +21,17 @@ import Notification from './components/Notification.vue';
 #app-layout {
   display: flex;
   min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.main-wrapper {
+  flex: 1;
+  margin-left: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-content {
   flex: 1;
-  margin-left: 240px; /* Matching sidebar width */
-  min-height: 100vh;
-  transition: margin-left 0.3s;
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    margin-left: 0;
-  }
 }
 </style>
