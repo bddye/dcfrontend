@@ -1,119 +1,105 @@
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <h2 class="page-title">设备管理</h2>
-      <div class="tab-nav">
+    <div class="card">
+      <div class="tab-nav mb-4">
         <button :class="['tab-btn', { active: currentTab === 'registration' }]" @click="currentTab = 'registration'">设备注册</button>
-        <button :class="['tab-btn', { active: currentTab === 'connected' }]" @click="currentTab = 'connected'">已连接设备</button>
+        <button :class="['tab-btn', { active: currentTab === 'connected' }]" @click="currentTab = 'connected'">已连接设备管理</button>
       </div>
-    </div>
 
-    <div v-if="currentTab === 'registration'">
-      <div class="card">
+      <div v-if="currentTab === 'registration'">
         <div class="search-panel">
-          <div class="form-group mb-0">
-            <label class="form-label">设备种类</label>
-            <select class="form-select w-64" v-model="selectedType">
-              <option value="">所有设备</option>
-              <option v-for="type in deviceTypes" :key="type" :value="type">{{ type }}</option>
-            </select>
-          </div>
+          <input type="text" class="form-input w-64" placeholder="请输入检索内容" v-model="selectedType" />
           <button @click="searchDevices" class="btn btn-primary">查询</button>
-          <button @click="openCreateModal" class="btn btn-success ml-auto">新增设备</button>
+          <button @click="selectedType = ''; searchDevices()" class="btn btn-secondary">重置</button>
+          <button @click="openCreateModal" class="btn btn-success ml-auto">+ 创建</button>
+          <button class="btn btn-danger" disabled>删除</button>
         </div>
       </div>
 
-      <div class="card">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>名称</th>
-                <th>ID</th>
-                <th>创建时间</th>
-                <th>位置</th>
-                <th>状态</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="device in devices" :key="device.id">
-                <td class="font-medium">{{ device.name }}</td>
-                <td class="text-xs font-mono">{{ device.id }}</td>
-                <td class="text-secondary">{{ formatTime(device.createTime) }}</td>
-                <td>{{ device.location || 'N/A' }}</td>
-                <td>
-                  <span :class="['status-dot', simulatorStatus[device.id] ? 'online' : 'offline']"
-                        :title="simulatorStatus[device.id] ? '已连接' : '未连接'"></span>
-                </td>
-                <td>
-                  <div class="flex-actions">
-                    <button @click="showDetails(device)" class="btn btn-secondary btn-sm">详情</button>
-                    <button @click="simulateBehavior(device)" class="btn btn-primary btn-sm">模拟</button>
-                    <button @click="confirmDelete(device)" class="btn btn-danger btn-sm">删除</button>
-                  </div>
-                </td>
-              </tr>
-              <tr v-if="devices.length === 0">
-                <td colspan="6" class="no-data">没有找到设备。</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div v-else-if="currentTab === 'connected'">
-      <div class="card">
+      <div v-else-if="currentTab === 'connected'">
         <div class="search-panel">
-          <button @click="fetchConnectedDevices" class="btn btn-primary">刷新列表</button>
+          <button @click="fetchConnectedDevices" class="btn btn-primary">查询全部</button>
           <button @click="openConnectModal" class="btn btn-success ml-auto">主动连接</button>
         </div>
       </div>
+    </div>
 
-      <div class="card">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>设备 ID</th>
-                <th>种类</th>
-                <th>状态</th>
-                <th>IP和端口</th>
-                <th>连接 ID</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="device in connectedDevices" :key="device.connectionId">
-                <td class="font-mono text-xs">{{ device.deviceId || 'unknown' }}</td>
-                <td>{{ device.deviceCat || 'unknown' }}</td>
-                <td>
-                  <span :class="['tag', device.deviceStates === 'ONLINE' ? 'tag-success' : 'tag-danger']">
-                    {{ device.deviceStates || 'unknown' }}
-                  </span>
-                </td>
-                <td>{{ device.ipAndPort || 'unknown' }}</td>
-                <td class="font-mono text-xs">{{ device.connectionId || 'unknown' }}</td>
-                <td>
-                  <button @click="openChangeInfoModal(device)" class="btn btn-secondary btn-sm">编辑信息</button>
-                </td>
-              </tr>
-              <tr v-if="connectedDevices.length === 0">
-                <td colspan="6" class="no-data">没有找到已连接的设备。</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="card">
+      <div v-if="currentTab === 'registration'" class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>名称</th>
+              <th>ID</th>
+              <th>创建时间</th>
+              <th>位置</th>
+              <th>模拟器</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="device in devices" :key="device.id">
+              <td class="font-medium">{{ device.name }}</td>
+              <td class="font-mono text-xs">{{ device.id }}</td>
+              <td class="text-secondary">{{ formatTime(device.createTime) }}</td>
+              <td>{{ device.location || 'N/A' }}</td>
+              <td>
+                <span :class="['status-dot', simulatorStatus[device.id] ? 'online' : 'offline']"></span>
+              </td>
+              <td>
+                <a @click="showDetails(device)" class="action-link">详情</a>
+                <a @click="simulateBehavior(device)" class="action-link">模拟</a>
+                <a @click="confirmDelete(device)" class="action-link danger">删除</a>
+              </td>
+            </tr>
+            <tr v-if="devices.length === 0">
+              <td colspan="6" class="no-data">暂无数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div v-else-if="currentTab === 'connected'" class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>设备ID</th>
+              <th>设备种类</th>
+              <th>状态</th>
+              <th>IP和端口</th>
+              <th>连接ID</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="device in connectedDevices" :key="device.connectionId">
+              <td class="font-mono text-xs">{{ device.deviceId || 'unknown' }}</td>
+              <td>{{ device.deviceCat || 'unknown' }}</td>
+              <td>
+                <span :class="['tag', device.deviceStates === 'ONLINE' ? 'tag-success' : 'tag-danger']">
+                  {{ device.deviceStates || 'unknown' }}
+                </span>
+              </td>
+              <td>{{ device.ipAndPort || 'unknown' }}</td>
+              <td class="font-mono text-xs">{{ device.connectionId || 'unknown' }}</td>
+              <td>
+                <a @click="openChangeInfoModal(device)" class="action-link">修改</a>
+              </td>
+            </tr>
+            <tr v-if="connectedDevices.length === 0">
+              <td colspan="6" class="no-data">暂无数据</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals (rest of logic remains same but using refined CommonModal) -->
     <CommonModal v-model="showModal" title="设备详情" :showConfirm="false" cancelText="关闭">
       <pre class="details-pre">{{ JSON.stringify(selectedDevice, null, 2) }}</pre>
     </CommonModal>
 
-    <CommonModal v-model="showCreateModal" title="新增设备" confirmText="创建" @confirm="submitNewDevice" :confirmDisabled="!templateDevice">
+    <CommonModal v-model="showCreateModal" title="新增设备" confirmText="提交" @confirm="submitNewDevice" :confirmDisabled="!templateDevice">
       <div class="form-group">
         <label class="form-label">设备种类</label>
         <select class="form-select" v-model="newDeviceType" @change="fetchTemplate">
@@ -131,8 +117,7 @@
       </div>
     </CommonModal>
 
-    <!-- Connect Modal -->
-    <CommonModal v-model="showConnectModal" title="主动连接设备" confirmText="连接" @confirm="submitConnect">
+    <CommonModal v-model="showConnectModal" title="主动连接设备" confirmText="确定" @confirm="submitConnect">
       <div class="form-group">
         <label class="form-label">连接方式</label>
         <select class="form-select" v-model="connectForm.connectionMethod">
@@ -143,11 +128,11 @@
       <div class="grid-2">
         <div class="form-group">
           <label class="form-label">IP</label>
-          <input type="text" class="form-input" v-model="connectForm.ip" required />
+          <input type="text" class="form-input" v-model="connectForm.ip" />
         </div>
         <div class="form-group">
           <label class="form-label">端口</label>
-          <input type="number" class="form-input" v-model.number="connectForm.port" required />
+          <input type="number" class="form-input" v-model.number="connectForm.port" />
         </div>
       </div>
       <div v-if="connectForm.connectionMethod === 'TCP'">
@@ -162,14 +147,14 @@
         <div class="grid-2">
           <div class="form-group">
             <label class="form-label">解码协议</label>
-            <select class="form-select" v-model="connectForm.how2decode" required>
+            <select class="form-select" v-model="connectForm.how2decode">
               <option value="" disabled>选择协议</option>
               <option v-for="opt in how2decodeOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">解码实体</label>
-            <select class="form-select" v-model="connectForm.decode2what" required>
+            <select class="form-select" v-model="connectForm.decode2what">
               <option value="" disabled>选择实体</option>
               <option v-for="opt in decode2whatOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
@@ -178,8 +163,7 @@
       </div>
     </CommonModal>
 
-    <!-- Change Info Modal -->
-    <CommonModal v-model="showChangeInfoModal" title="更改连接信息" confirmText="提交更改" @confirm="submitChangeInfo">
+    <CommonModal v-model="showChangeInfoModal" title="修改设备信息" confirmText="确定" @confirm="submitChangeInfo">
       <div class="form-group">
         <label class="form-label">设备 ID</label>
         <input type="text" class="form-input" v-model="changeInfoForm.deviceId" />
@@ -201,7 +185,6 @@
       </div>
     </CommonModal>
 
-    <!-- Simulator Modal -->
     <CommonModal v-model="showSimulatorModal" :title="`模拟行为: ${simulatingDevice?.name}`" width="40rem" :showDefaultFooter="false">
       <div class="simulator-box">
         <div v-if="!simulatorStatus[simulatingDevice?.id]" class="setup-panel">
@@ -209,7 +192,6 @@
             <div class="form-group">
               <label class="form-label">类型</label>
               <select class="form-select" v-model="simulatorForm.type">
-                <option value="" disabled>选择类型</option>
                 <option v-for="type in simulatorTypeOptions" :key="type" :value="type">{{ type }}</option>
               </select>
             </div>
@@ -222,49 +204,38 @@
               <input type="number" class="form-input" v-model.number="simulatorForm.port" />
             </div>
           </div>
-          <button @click="executeSimulateAction('CONNECT')" class="btn btn-primary w-full mt-2"
-                  :disabled="!simulatorForm.type || !simulatorForm.ip || !simulatorForm.port">
-            连接服务器
-          </button>
+          <button @click="executeSimulateAction('CONNECT')" class="btn btn-primary w-full mt-4">连接服务器</button>
         </div>
-
         <div v-else class="active-panel">
-          <div class="status-banner">
+          <div class="tag tag-success w-full text-center p-2 mb-4">
              ✅ 已连接到 {{ simulatorForm.type }} ({{ simulatorForm.ip }}:{{ simulatorForm.port }})
           </div>
-          
-          <div class="send-section mt-4">
-            <div v-if="simulatorForm.type === 'MQTT'">
-              <div class="form-group">
-                <label class="form-label">Payload (明文)</label>
-                <textarea class="form-textarea" v-model="simulatorForm.payload" rows="3"></textarea>
+          <div v-if="simulatorForm.type === 'MQTT'">
+            <div class="form-group">
+              <label class="form-label">Payload</label>
+              <textarea class="form-textarea" v-model="simulatorForm.payload" rows="3"></textarea>
+            </div>
+          </div>
+          <div v-else-if="simulatorForm.type === 'TCP-only'">
+            <div class="form-group">
+              <label class="form-label">报文格式</label>
+              <div class="flex-actions">
+                <label class="flex-actions items-center cursor-pointer">
+                  <input type="radio" value="plaintext" v-model="tcpDataFormat" /> <span>明文</span>
+                </label>
+                <label class="flex-actions items-center cursor-pointer">
+                  <input type="radio" value="hex" v-model="tcpDataFormat" /> <span>HEX</span>
+                </label>
               </div>
             </div>
-            <div v-else-if="simulatorForm.type === 'TCP-only'">
-              <div class="form-group">
-                <label class="form-label">报文格式</label>
-                <div class="radio-group-row">
-                  <label class="radio-label">
-                    <input type="radio" value="plaintext" v-model="tcpDataFormat" />
-                    <span>明文 (UTF-8)</span>
-                  </label>
-                  <label class="radio-label">
-                    <input type="radio" value="hex" v-model="tcpDataFormat" />
-                    <span>二进制 (Hex)</span>
-                  </label>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">{{ tcpDataFormat === 'plaintext' ? '明文输入' : 'Hex 输入 (如: 50 61 79...)' }}</label>
-                <textarea class="form-textarea font-mono" v-model="simulatorForm.data" rows="3"></textarea>
-              </div>
+            <div class="form-group">
+              <label class="form-label">数据内容</label>
+              <textarea class="form-textarea font-mono" v-model="simulatorForm.data" rows="3"></textarea>
             </div>
-
-            <div class="flex-actions mt-4">
-              <button @click="executeSimulateAction('SEND')" class="btn btn-primary flex-1">发送报文</button>
-              <button @click="executeSimulateAction('DISCONNECT')" class="btn btn-danger">断开连接</button>
-              <button @click="showSimulatorModal = false" class="btn btn-secondary">关闭</button>
-            </div>
+          </div>
+          <div class="flex-actions mt-4">
+            <button @click="executeSimulateAction('SEND')" class="btn btn-primary flex-1">发送报文</button>
+            <button @click="executeSimulateAction('DISCONNECT')" class="btn btn-danger">断开连接</button>
           </div>
         </div>
       </div>
@@ -380,8 +351,20 @@ const submitNewDevice = async () => {
     } catch (error) { notificationStore.error('创建设备失败'); }
 };
 
+const showDeleteConfirm = ref(false);
+const deviceToDelete = ref(null);
+
 const confirmDelete = (device) => {
-    if (confirm(`确定要删除设备 "${device.name}" 吗？`)) deleteDevice(device);
+    deviceToDelete.value = device;
+    showDeleteConfirm.value = true;
+};
+
+const handleConfirmDelete = () => {
+    if (deviceToDelete.value) {
+        deleteDevice(deviceToDelete.value);
+        showDeleteConfirm.value = false;
+        deviceToDelete.value = null;
+    }
 };
 
 const deleteDevice = async (device) => {
@@ -441,7 +424,6 @@ const executeSimulateAction = async (choice) => {
         payload.port = choice === 'CONNECT' ? form.port : form.connectedPort;
         const t = choice === 'CONNECT' ? form.type : form.connectedType;
         payload.type = t === 'TCP-only' ? 'TCPo' : t;
-        if (!payload.ip || !payload.port) { notificationStore.warning('需要 IP 和端口'); return; }
     }
     if (choice === 'SEND') {
         payload.ip = form.connectedIP; payload.port = form.connectedPort;
@@ -543,18 +525,20 @@ const plaintextToHex = (text) => {
 <style scoped>
 .tab-nav {
   display: flex;
-  gap: 1rem;
+  gap: 24px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 24px;
 }
 
 .tab-btn {
-  padding: 0.5rem 1rem;
+  padding: 12px 0;
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 .tab-btn.active {
@@ -564,33 +548,18 @@ const plaintextToHex = (text) => {
 
 .status-dot {
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
+.status-dot.online { background-color: var(--success-color); }
+.status-dot.offline { background-color: var(--text-secondary); }
 
-.status-dot.online { background-color: var(--success-color); box-shadow: 0 0 5px var(--success-color); }
-.status-dot.offline { background-color: var(--danger-color); }
+.details-pre { background: #f5f5f5; padding: 12px; border-radius: 2px; font-size: 13px; }
 
-.flex-actions { display: flex; gap: 0.5rem; }
-
-.ml-auto { margin-left: auto; }
-
-.details-pre { background: #f1f5f9; padding: 1rem; border-radius: 8px; font-size: 0.8rem; }
-
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-
-.simulator-box { padding: 0.5rem; }
-
-.status-banner { padding: 0.75rem; background: #dcfce7; color: #166534; border-radius: 8px; font-weight: 600; text-align: center; }
-
-.radio-group-row { display: flex; gap: 1.5rem; margin-top: 0.25rem; }
-
-.radio-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; }
-
-.w-full { width: 100%; }
-
+.mb-4 { margin-bottom: 16px; }
 .flex-1 { flex: 1; }
-
-.font-mono { font-family: ui-monospace, monospace; }
+.items-center { align-items: center; }
+.cursor-pointer { cursor: pointer; }
+.p-2 { padding: 8px; }
 </style>
