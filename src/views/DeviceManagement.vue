@@ -1,5 +1,11 @@
 <template>
   <div class="device-management-page">
+    <div class="tab-switcher">
+      <button :class="{ active: currentTab === 'registration' }" @click="currentTab = 'registration'">设备注册</button>
+      <button :class="{ active: currentTab === 'connected' }" @click="currentTab = 'connected'">已连接设备管理</button>
+    </div>
+
+    <div v-if="currentTab === 'registration'">
     <div class="search-panel">
       <div class="search-form">
         <label for="device-type">设备种类:</label>
@@ -65,6 +71,160 @@
         </div>
         <div class="modal-body">
           <pre>{{ JSON.stringify(selectedDevice, null, 2) }}</pre>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div v-else-if="currentTab === 'connected'">
+      <div class="management-top-panel">
+        <div class="query-section">
+          <div class="search-form">
+            <label>查询条件:</label>
+            <button @click="fetchConnectedDevices">查询全部</button>
+          </div>
+        </div>
+        <div class="connect-section">
+          <button @click="openConnectModal" class="active-connect-btn">主动连接</button>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="device-list">
+        <h3>已连接设备列表</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>设备ID</th>
+              <th>设备种类</th>
+              <th>状态</th>
+              <th>IP和端口</th>
+              <th>连接ID</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="device in connectedDevices" :key="device.connectionId">
+              <td>{{ device.deviceId || 'unknown' }}</td>
+              <td>{{ device.deviceCat || 'unknown' }}</td>
+              <td>
+                <span :class="['status-tag', device.deviceStates === 'ONLINE' ? 'online' : 'offline']">
+                  {{ device.deviceStates || 'unknown' }}
+                </span>
+              </td>
+              <td>{{ device.ipAndPort || 'unknown' }}</td>
+              <td>{{ device.connectionId || 'unknown' }}</td>
+              <td class="action-buttons">
+                <button @click="openChangeInfoModal(device)" class="detail-btn">更改设备信息</button>
+              </td>
+            </tr>
+            <tr v-if="connectedDevices.length === 0">
+              <td colspan="6" class="no-data">没有找到已连接的设备。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Active Connect Modal -->
+    <div v-if="showConnectModal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h4>主动连接设备</h4>
+          <span class="close-btn" @click="showConnectModal = false">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="submitConnect">
+            <div class="form-group">
+              <label>连接方式:</label>
+              <select v-model="connectForm.connectionMethod">
+                <option value="TCP">TCP</option>
+                <option value="MQTT" disabled>MQTT (暂不支持)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>IP:</label>
+              <input type="text" v-model="connectForm.ip" required />
+            </div>
+
+            <div class="form-group">
+              <label>端口:</label>
+              <input type="number" v-model.number="connectForm.port" required />
+            </div>
+
+            <div v-if="connectForm.connectionMethod === 'TCP'">
+              <div class="form-group">
+                <label>粘拆包配置:</label>
+                <select v-model="connectForm.bufferProcessMode">
+                  <option value="DELIMITED">行分隔符模式</option>
+                  <option value="FIXED_LENGTH">定长头模式(4字节)</option>
+                  <option value="CUSTOM">自定义模式</option>
+                </select>
+                <p v-if="connectForm.bufferProcessMode === 'CUSTOM'" class="todo-info">
+                  <!-- TODO: 和服务端口开放中的TCP端口开放一样。 -->
+                  TODO: 自定义模式开发中
+                </p>
+              </div>
+
+              <div class="form-group">
+                <label>解码协议:</label>
+                <select v-model="connectForm.how2decode" required>
+                  <option value="" disabled>请选择解码协议</option>
+                  <option v-for="opt in how2decodeOptions" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>解码实体:</label>
+                <select v-model="connectForm.decode2what" required>
+                  <option value="" disabled>请选择解码实体</option>
+                  <option v-for="opt in decode2whatOptions" :key="opt" :value="opt">{{ opt }}</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="submit-btn">连接</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Information Modal -->
+    <div v-if="showChangeInfoModal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h4>更改已连接设备信息</h4>
+          <span class="close-btn" @click="showChangeInfoModal = false">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="submitChangeInfo">
+            <div class="form-group">
+              <label>设备ID:</label>
+              <input type="text" v-model="changeInfoForm.deviceId" />
+            </div>
+            <div class="form-group">
+              <label>设备种类:</label>
+              <input type="text" v-model="changeInfoForm.deviceCat" />
+            </div>
+            <div class="form-group">
+              <label>状态:</label>
+              <select v-model="changeInfoForm.deviceStates">
+                <option value="ONLINE">ONLINE</option>
+                <option value="OFFLINE">OFFLINE</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>IP和端口:</label>
+              <input type="text" v-model="changeInfoForm.ipAndPort" />
+            </div>
+            <div class="form-group">
+              <label>连接ID:</label>
+              <input type="text" v-model="changeInfoForm.connectionId" readonly />
+            </div>
+            <button type="submit" class="submit-btn">提交更改</button>
+          </form>
         </div>
       </div>
     </div>
@@ -211,6 +371,7 @@ import { ref, onMounted, watch, defineProps } from 'vue';
 import axios from 'axios';
 import config from '../config/config';
 
+const currentTab = ref('registration');
 const devices = ref([]);
 const deviceTypes = ref([]);
 const selectedType = ref('');
@@ -253,6 +414,30 @@ const simulatorTypeOptions = ref([]);  // 从 BASE_URL/server/getAllTypes 获�
 
 // 报文相关状态 (仅用于 TCPo)
 const tcpDataFormat = ref('plaintext'); // 'plaintext' 或 'hex'
+
+const connectedDevices = ref([]);
+const showConnectModal = ref(false);
+const showChangeInfoModal = ref(false);
+const how2decodeOptions = ref([]);
+const decode2whatOptions = ref([]);
+
+const connectForm = ref({
+    connectionMethod: 'TCP',
+    ip: '',
+    port: null,
+    bufferProcessMode: 'DELIMITED',
+    script: null,
+    how2decode: '',
+    decode2what: ''
+});
+
+const changeInfoForm = ref({
+    deviceId: '',
+    deviceCat: '',
+    deviceStates: '',
+    ipAndPort: '',
+    connectionId: ''
+});
 
 // ⚠️ 连接状态，key: device.id, value: boolean (true=已连接)
 const simulatorStatus = ref({}); 
@@ -736,6 +921,93 @@ const closeSimulatorModal = () => {
     // 模态框关闭时不改变连接状态
 };
 
+const fetchConnectedDevices = async () => {
+    try {
+        const response = await axios.get(`${config.BASE_URL}/deviceControl/getAllConnectedDeviceStates`);
+        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+            connectedDevices.value = response.data.data || [];
+        } else {
+            showMessage('错误', response.data.message || '获取已连接设备失败');
+        }
+    } catch (error) {
+        console.error('获取已连接设备失败:', error);
+        showMessage('错误', '网络错误，获取已连接设备失败');
+    }
+};
+
+const openConnectModal = async () => {
+    showConnectModal.value = true;
+    // Reset form
+    connectForm.value = {
+        connectionMethod: 'TCP',
+        ip: '',
+        port: null,
+        bufferProcessMode: 'DELIMITED',
+        script: null,
+        how2decode: '',
+        decode2what: ''
+    };
+
+    // Fetch options
+    try {
+        const [howRes, whatRes] = await Promise.all([
+            axios.get(`${config.BASE_URL}/server/getAllHow2decode`),
+            axios.get(`${config.BASE_URL}/server/getAllDecode2what`)
+        ]);
+        if (howRes.data.code === SUCCESS_CODE) how2decodeOptions.value = howRes.data.data || [];
+        if (whatRes.data.code === SUCCESS_CODE) decode2whatOptions.value = whatRes.data.data || [];
+    } catch (error) {
+        console.error('获取解码选项失败:', error);
+    }
+};
+
+const submitConnect = async () => {
+    if (connectForm.value.connectionMethod === 'TCP') {
+        try {
+            const payload = {
+                ip: connectForm.value.ip,
+                port: connectForm.value.port,
+                bufferProcessMode: connectForm.value.bufferProcessMode,
+                script: connectForm.value.script,
+                how2decode: connectForm.value.how2decode,
+                decode2what: connectForm.value.decode2what
+            };
+            const response = await axios.post(`${config.BASE_URL}/deviceControl/ConnectDeviceByTCPo`, payload);
+            if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+                showMessage('成功', '连接成功');
+                showConnectModal.value = false;
+                fetchConnectedDevices();
+            } else {
+                showMessage('失败', response.data.message || '连接失败');
+            }
+        } catch (error) {
+            console.error('连接请求失败:', error);
+            showMessage('错误', '网络错误，连接失败');
+        }
+    }
+};
+
+const openChangeInfoModal = (device) => {
+    changeInfoForm.value = { ...device };
+    showChangeInfoModal.value = true;
+};
+
+const submitChangeInfo = async () => {
+    try {
+        const response = await axios.post(`${config.BASE_URL}/deviceControl/ChangeConnectedDeviceInformation`, changeInfoForm.value);
+        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
+            showMessage('成功', '更改信息成功');
+            showChangeInfoModal.value = false;
+            fetchConnectedDevices();
+        } else {
+            showMessage('失败', response.data.message || '更改失败');
+        }
+    } catch (error) {
+        console.error('更改信息失败:', error);
+        showMessage('错误', '网络错误，更改信息失败');
+    }
+};
+
 
 // 页面加载时自动获取设备种类和所有设备
 onMounted(async () => {
@@ -812,6 +1084,72 @@ const plaintextToHex = (text) => {
 /* 样式保持不变 */
 .device-management-page {
   font-family: Arial, sans-serif;
+}
+
+.tab-switcher {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  background-color: #f1f3f5;
+  border-radius: 8px;
+}
+
+.tab-switcher button {
+  background-color: #e9ecef;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  padding: 10px 20px;
+  font-weight: bold;
+}
+
+.tab-switcher button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.management-top-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.active-connect-btn {
+  background-color: #17a2b8;
+}
+
+.active-connect-btn:hover {
+  background-color: #138496;
+}
+
+.status-tag {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status-tag.online {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-tag.offline {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.todo-info {
+  color: #856404;
+  background-color: #fff3cd;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-top: 5px;
 }
 
 .search-panel {
