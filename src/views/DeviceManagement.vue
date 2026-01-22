@@ -1,375 +1,283 @@
 <template>
-  <div class="device-management-page">
-    <div class="tab-switcher">
-      <button :class="{ active: currentTab === 'registration' }" @click="currentTab = 'registration'">设备注册</button>
-      <button :class="{ active: currentTab === 'connected' }" @click="currentTab = 'connected'">已连接设备管理</button>
+  <div class="page-container">
+    <div class="page-header">
+      <h2 class="page-title">设备管理</h2>
+      <div class="tab-nav">
+        <button :class="['tab-btn', { active: currentTab === 'registration' }]" @click="currentTab = 'registration'">设备注册</button>
+        <button :class="['tab-btn', { active: currentTab === 'connected' }]" @click="currentTab = 'connected'">已连接设备</button>
+      </div>
     </div>
 
     <div v-if="currentTab === 'registration'">
-    <div class="search-panel">
-      <div class="search-form">
-        <label for="device-type">设备种类:</label>
-        <select id="device-type" v-model="selectedType">
-          <option value="">所有设备</option>
-          <option v-for="type in deviceTypes" :key="type" :value="type">
-            {{ type }}
-          </option>
-        </select>
-        <button @click="searchDevices">查询</button>
-      </div>
-
-      <button @click="openCreateModal" class="new-device-btn">新增设备</button>
-    </div>
-
-    <hr />
-
-    <div class="device-list">
-      <h3>设备列表</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>名称</th>
-            <th>ID</th> <th>创建时间</th>
-            <th>位置</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="device in devices" :key="device.id">
-            <td>{{ device.name }}</td>
-            <td>{{ device.id }}</td>
-            <td>{{ formatTime(device.createTime) }}</td>
-            <td>{{ device.location || 'N/A' }}</td>
-            <td class="action-buttons">
-              <span 
-                :class="{'status-indicator': true, 'connected': simulatorStatus[device.id], 'disconnected': !simulatorStatus[device.id]}"
-                :title="simulatorStatus[device.id] ? '模拟器已连接' : '模拟器未连接'"
-              ></span>
-              
-              <button @click="showDetails(device)" class="detail-btn">
-                详情
-              </button>
-              <button @click="confirmDelete(device)" class="delete-btn">
-                删除
-              </button>
-              <button @click="simulateBehavior(device)" class="simulate-btn">
-                模拟行为 </button>
-            </td>
-          </tr>
-          <tr v-if="devices.length === 0">
-            <td colspan="5" class="no-data">没有找到设备。</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div v-if="showModal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h4>设备详情</h4>
-          <span class="close-btn" @click="showModal = false">&times;</span>
-        </div>
-        <div class="modal-body">
-          <pre>{{ JSON.stringify(selectedDevice, null, 2) }}</pre>
+      <div class="card">
+        <div class="search-panel">
+          <div class="form-group mb-0">
+            <label class="form-label">设备种类</label>
+            <select class="form-select w-64" v-model="selectedType">
+              <option value="">所有设备</option>
+              <option v-for="type in deviceTypes" :key="type" :value="type">{{ type }}</option>
+            </select>
+          </div>
+          <button @click="searchDevices" class="btn btn-primary">查询</button>
+          <button @click="openCreateModal" class="btn btn-success ml-auto">新增设备</button>
         </div>
       </div>
-    </div>
+
+      <div class="card">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>名称</th>
+                <th>ID</th>
+                <th>创建时间</th>
+                <th>位置</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="device in devices" :key="device.id">
+                <td class="font-medium">{{ device.name }}</td>
+                <td class="text-xs font-mono">{{ device.id }}</td>
+                <td class="text-secondary">{{ formatTime(device.createTime) }}</td>
+                <td>{{ device.location || 'N/A' }}</td>
+                <td>
+                  <span :class="['status-dot', simulatorStatus[device.id] ? 'online' : 'offline']"
+                        :title="simulatorStatus[device.id] ? '已连接' : '未连接'"></span>
+                </td>
+                <td>
+                  <div class="flex-actions">
+                    <button @click="showDetails(device)" class="btn btn-secondary btn-sm">详情</button>
+                    <button @click="simulateBehavior(device)" class="btn btn-primary btn-sm">模拟</button>
+                    <button @click="confirmDelete(device)" class="btn btn-danger btn-sm">删除</button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="devices.length === 0">
+                <td colspan="6" class="no-data">没有找到设备。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <div v-else-if="currentTab === 'connected'">
-      <div class="management-top-panel">
-        <div class="query-section">
-          <div class="search-form">
-            <label>查询条件:</label>
-            <button @click="fetchConnectedDevices">查询全部</button>
-          </div>
-        </div>
-        <div class="connect-section">
-          <button @click="openConnectModal" class="active-connect-btn">主动连接</button>
+      <div class="card">
+        <div class="search-panel">
+          <button @click="fetchConnectedDevices" class="btn btn-primary">刷新列表</button>
+          <button @click="openConnectModal" class="btn btn-success ml-auto">主动连接</button>
         </div>
       </div>
 
-      <hr />
-
-      <div class="device-list">
-        <h3>已连接设备列表</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>设备ID</th>
-              <th>设备种类</th>
-              <th>状态</th>
-              <th>IP和端口</th>
-              <th>连接ID</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="device in connectedDevices" :key="device.connectionId">
-              <td>{{ device.deviceId || 'unknown' }}</td>
-              <td>{{ device.deviceCat || 'unknown' }}</td>
-              <td>
-                <span :class="['status-tag', device.deviceStates === 'ONLINE' ? 'online' : 'offline']">
-                  {{ device.deviceStates || 'unknown' }}
-                </span>
-              </td>
-              <td>{{ device.ipAndPort || 'unknown' }}</td>
-              <td>{{ device.connectionId || 'unknown' }}</td>
-              <td class="action-buttons">
-                <button @click="openChangeInfoModal(device)" class="detail-btn">更改设备信息</button>
-              </td>
-            </tr>
-            <tr v-if="connectedDevices.length === 0">
-              <td colspan="6" class="no-data">没有找到已连接的设备。</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Active Connect Modal -->
-    <div v-if="showConnectModal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h4>主动连接设备</h4>
-          <span class="close-btn" @click="showConnectModal = false">&times;</span>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitConnect">
-            <div class="form-group">
-              <label>连接方式:</label>
-              <select v-model="connectForm.connectionMethod">
-                <option value="TCP">TCP</option>
-                <option value="MQTT" disabled>MQTT (暂不支持)</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>IP:</label>
-              <input type="text" v-model="connectForm.ip" required />
-            </div>
-
-            <div class="form-group">
-              <label>端口:</label>
-              <input type="number" v-model.number="connectForm.port" required />
-            </div>
-
-            <div v-if="connectForm.connectionMethod === 'TCP'">
-              <div class="form-group">
-                <label>粘拆包配置:</label>
-                <select v-model="connectForm.bufferProcessMode">
-                  <option value="DELIMITED">行分隔符模式</option>
-                  <option value="FIXED_LENGTH">定长头模式(4字节)</option>
-                  <option value="CUSTOM">自定义模式</option>
-                </select>
-                <p v-if="connectForm.bufferProcessMode === 'CUSTOM'" class="todo-info">
-                  <!-- TODO: 和服务端口开放中的TCP端口开放一样。 -->
-                  TODO: 自定义模式开发中
-                </p>
-              </div>
-
-              <div class="form-group">
-                <label>解码协议:</label>
-                <select v-model="connectForm.how2decode" required>
-                  <option value="" disabled>请选择解码协议</option>
-                  <option v-for="opt in how2decodeOptions" :key="opt" :value="opt">{{ opt }}</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>解码实体:</label>
-                <select v-model="connectForm.decode2what" required>
-                  <option value="" disabled>请选择解码实体</option>
-                  <option v-for="opt in decode2whatOptions" :key="opt" :value="opt">{{ opt }}</option>
-                </select>
-              </div>
-            </div>
-
-            <button type="submit" class="submit-btn">连接</button>
-          </form>
+      <div class="card">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>设备 ID</th>
+                <th>种类</th>
+                <th>状态</th>
+                <th>IP和端口</th>
+                <th>连接 ID</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="device in connectedDevices" :key="device.connectionId">
+                <td class="font-mono text-xs">{{ device.deviceId || 'unknown' }}</td>
+                <td>{{ device.deviceCat || 'unknown' }}</td>
+                <td>
+                  <span :class="['tag', device.deviceStates === 'ONLINE' ? 'tag-success' : 'tag-danger']">
+                    {{ device.deviceStates || 'unknown' }}
+                  </span>
+                </td>
+                <td>{{ device.ipAndPort || 'unknown' }}</td>
+                <td class="font-mono text-xs">{{ device.connectionId || 'unknown' }}</td>
+                <td>
+                  <button @click="openChangeInfoModal(device)" class="btn btn-secondary btn-sm">编辑信息</button>
+                </td>
+              </tr>
+              <tr v-if="connectedDevices.length === 0">
+                <td colspan="6" class="no-data">没有找到已连接的设备。</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <!-- Change Information Modal -->
-    <div v-if="showChangeInfoModal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h4>更改已连接设备信息</h4>
-          <span class="close-btn" @click="showChangeInfoModal = false">&times;</span>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitChangeInfo">
-            <div class="form-group">
-              <label>设备ID:</label>
-              <input type="text" v-model="changeInfoForm.deviceId" />
-            </div>
-            <div class="form-group">
-              <label>设备种类:</label>
-              <input type="text" v-model="changeInfoForm.deviceCat" />
-            </div>
-            <div class="form-group">
-              <label>状态:</label>
-              <select v-model="changeInfoForm.deviceStates">
-                <option value="ONLINE">ONLINE</option>
-                <option value="OFFLINE">OFFLINE</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>IP和端口:</label>
-              <input type="text" v-model="changeInfoForm.ipAndPort" />
-            </div>
-            <div class="form-group">
-              <label>连接ID:</label>
-              <input type="text" v-model="changeInfoForm.connectionId" readonly />
-            </div>
-            <button type="submit" class="submit-btn">提交更改</button>
-          </form>
-        </div>
+    <!-- Modals -->
+    <CommonModal v-model="showModal" title="设备详情" :showConfirm="false" cancelText="关闭">
+      <pre class="details-pre">{{ JSON.stringify(selectedDevice, null, 2) }}</pre>
+    </CommonModal>
+
+    <CommonModal v-model="showCreateModal" title="新增设备" confirmText="创建" @confirm="submitNewDevice" :confirmDisabled="!templateDevice">
+      <div class="form-group">
+        <label class="form-label">设备种类</label>
+        <select class="form-select" v-model="newDeviceType" @change="fetchTemplate">
+          <option value="" disabled>请选择设备种类</option>
+          <option v-for="type in deviceTypes" :key="type" :value="type">{{ type }}</option>
+        </select>
       </div>
-    </div>
-
-    <div v-if="showCreateModal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h4>新增设备</h4>
-          <span class="close-btn" @click="closeCreateModal">&times;</span>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="submitNewDevice">
-            <div class="form-group">
-              <label for="new-device-type">设备种类:</label>
-              <select id="new-device-type" v-model="newDeviceType" @change="fetchTemplate">
-                <option value="" disabled>请选择设备种类</option>
-                <option v-for="type in deviceTypes" :key="type" :value="type">
-                  {{ type }}
-                </option>
-              </select>
-            </div>
-
-            <div v-if="templateDevice" class="form-fields">
-              <div v-for="(value, key) in templateDevice" :key="key" class="form-group">
-                <div v-if="key !== 'id' && key !== 'createTime' && key !== 'type'">
-                  <label :for="key">{{ key }}:</label>
-                  <input type="text" :id="key" v-model="templateDevice[key]" />
-                </div>
-              </div>
-            </div>
-
-            <button type="submit" class="submit-btn" :disabled="!templateDevice">创建</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showCustomModal" class="modal-overlay top-level-overlay">
-      <div class="modal message-modal">
-        <div class="modal-header">
-          <h4>{{ modalTitle }}</h4>
-          <span class="close-btn" @click="closeCustomModal">&times;</span>
-        </div>
-        <div class="modal-body">
-          <p>{{ modalContent }}</p>
-          <div class="modal-actions">
-            <button v-if="modalConfirmAction" @click="performConfirmedAction" class="confirm-btn">确定</button>
-            <button @click="closeCustomModal" class="close-modal-btn">{{ modalConfirmAction ? '取消' : '确定' }}</button>
+      <div v-if="templateDevice" class="template-fields">
+        <div v-for="(value, key) in templateDevice" :key="key">
+          <div v-if="key !== 'id' && key !== 'createTime' && key !== 'type'" class="form-group">
+            <label class="form-label">{{ key }}</label>
+            <input type="text" class="form-input" v-model="templateDevice[key]" />
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div v-if="showSimulatorModal" class="modal-overlay">
-    <div class="modal simulator-modal">
-      <div class="modal-header">
-        <h4>模拟设备行为: {{ simulatingDevice?.name }} (ID: {{ simulatingDevice?.id }})</h4>
-        <span class="close-btn" @click="closeSimulatorModal">&times;</span>
+    </CommonModal>
+
+    <!-- Connect Modal -->
+    <CommonModal v-model="showConnectModal" title="主动连接设备" confirmText="连接" @confirm="submitConnect">
+      <div class="form-group">
+        <label class="form-label">连接方式</label>
+        <select class="form-select" v-model="connectForm.connectionMethod">
+          <option value="TCP">TCP</option>
+          <option value="MQTT" disabled>MQTT (暂不支持)</option>
+        </select>
       </div>
-      <div class="modal-body">
-        
-        <div v-if="!simulatorStatus[simulatingDevice?.id]" class="connection-panel">
-          <div class="form-group type-group">
-            <label for="sim-type">类型:</label>
-            <select id="sim-type" v-model="simulatorForm.type">
-              <option value="" disabled>请选择类型</option>
-              <option v-for="type in simulatorTypeOptions" :key="type" :value="type">
-                {{ type }}
-              </option>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">IP</label>
+          <input type="text" class="form-input" v-model="connectForm.ip" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">端口</label>
+          <input type="number" class="form-input" v-model.number="connectForm.port" required />
+        </div>
+      </div>
+      <div v-if="connectForm.connectionMethod === 'TCP'">
+        <div class="form-group">
+          <label class="form-label">粘拆包配置</label>
+          <select class="form-select" v-model="connectForm.bufferProcessMode">
+            <option value="DELIMITED">行分隔符模式</option>
+            <option value="FIXED_LENGTH">定长头模式(4字节)</option>
+            <option value="CUSTOM">自定义模式</option>
+          </select>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">解码协议</label>
+            <select class="form-select" v-model="connectForm.how2decode" required>
+              <option value="" disabled>选择协议</option>
+              <option v-for="opt in how2decodeOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
           </div>
+          <div class="form-group">
+            <label class="form-label">解码实体</label>
+            <select class="form-select" v-model="connectForm.decode2what" required>
+              <option value="" disabled>选择实体</option>
+              <option v-for="opt in decode2whatOptions" :key="opt" :value="opt">{{ opt }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </CommonModal>
 
-          <div class="connection-info">
-            <div class="form-group ip-group">
-              <label for="sim-ip">IP:</label>
-              <input type="text" id="sim-ip" v-model="simulatorForm.ip" placeholder="服务器 IP">
+    <!-- Change Info Modal -->
+    <CommonModal v-model="showChangeInfoModal" title="更改连接信息" confirmText="提交更改" @confirm="submitChangeInfo">
+      <div class="form-group">
+        <label class="form-label">设备 ID</label>
+        <input type="text" class="form-input" v-model="changeInfoForm.deviceId" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">设备种类</label>
+        <input type="text" class="form-input" v-model="changeInfoForm.deviceCat" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">状态</label>
+        <select class="form-select" v-model="changeInfoForm.deviceStates">
+          <option value="ONLINE">ONLINE</option>
+          <option value="OFFLINE">OFFLINE</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">IP 和端口</label>
+        <input type="text" class="form-input" v-model="changeInfoForm.ipAndPort" />
+      </div>
+    </CommonModal>
+
+    <!-- Simulator Modal -->
+    <CommonModal v-model="showSimulatorModal" :title="`模拟行为: ${simulatingDevice?.name}`" width="40rem" :showDefaultFooter="false">
+      <div class="simulator-box">
+        <div v-if="!simulatorStatus[simulatingDevice?.id]" class="setup-panel">
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">类型</label>
+              <select class="form-select" v-model="simulatorForm.type">
+                <option value="" disabled>选择类型</option>
+                <option v-for="type in simulatorTypeOptions" :key="type" :value="type">{{ type }}</option>
+              </select>
             </div>
-            <div class="form-group port-group">
-              <label for="sim-port">端口:</label>
-              <input type="number" id="sim-port" v-model.number="simulatorForm.port" placeholder="端口号">
+            <div class="form-group">
+              <label class="form-label">IP</label>
+              <input type="text" class="form-input" v-model="simulatorForm.ip" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">端口</label>
+              <input type="number" class="form-input" v-model.number="simulatorForm.port" />
             </div>
           </div>
-
-          <button @click="executeSimulateAction('CONNECT')" class="connect-btn" 
+          <button @click="executeSimulateAction('CONNECT')" class="btn btn-primary w-full mt-2"
                   :disabled="!simulatorForm.type || !simulatorForm.ip || !simulatorForm.port">
-            连接
+            连接服务器
           </button>
         </div>
 
-        <div v-else class="connection-panel connected-info">
-          <p>✅ 已连接到 **{{ simulatorForm.type }}** 服务器 ({{ simulatorForm.ip }}:{{ simulatorForm.port }})</p>
-        </div>
-        
-        <hr v-if="simulatorForm.type" />
-        
-        <div v-if="simulatorForm.type && simulatorStatus[simulatingDevice?.id]" class="send-panel">
-          <h4>发送报文 (类型: {{ simulatorForm.type }})</h4>
-          
-          <div v-if="simulatorForm.type === 'MQTT'">
-            <div class="form-group">
-              <label for="sim-payload">Payload (明文):</label>
-              <textarea id="sim-payload" v-model="simulatorForm.payload" rows="4"></textarea>
-            </div>
+        <div v-else class="active-panel">
+          <div class="status-banner">
+             ✅ 已连接到 {{ simulatorForm.type }} ({{ simulatorForm.ip }}:{{ simulatorForm.port }})
           </div>
           
-          <div v-else-if="simulatorForm.type === 'TCP-only'">
-            <div class="form-group data-format-group">
-              <label>报文格式:</label>
-              <div class="radio-group horizontal-radio-group">
-                <label>
-                  <input type="radio" value="plaintext" v-model="tcpDataFormat" />
-                  明文报文 (UTF-8)
-                </label>
-                <label>
-                  <input type="radio" value="hex" v-model="tcpDataFormat" />
-                  二进制报文 (Hex)
-                </label>
+          <div class="send-section mt-4">
+            <div v-if="simulatorForm.type === 'MQTT'">
+              <div class="form-group">
+                <label class="form-label">Payload (明文)</label>
+                <textarea class="form-textarea" v-model="simulatorForm.payload" rows="3"></textarea>
+              </div>
+            </div>
+            <div v-else-if="simulatorForm.type === 'TCP-only'">
+              <div class="form-group">
+                <label class="form-label">报文格式</label>
+                <div class="radio-group-row">
+                  <label class="radio-label">
+                    <input type="radio" value="plaintext" v-model="tcpDataFormat" />
+                    <span>明文 (UTF-8)</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" value="hex" v-model="tcpDataFormat" />
+                    <span>二进制 (Hex)</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ tcpDataFormat === 'plaintext' ? '明文输入' : 'Hex 输入 (如: 50 61 79...)' }}</label>
+                <textarea class="form-textarea font-mono" v-model="simulatorForm.data" rows="3"></textarea>
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="sim-data">{{ tcpDataFormat === 'plaintext' ? '明文输入' : '二进制 Hex (如: 50 61 79...)' }}:</label>
-              <textarea id="sim-data" v-model="simulatorForm.data" rows="4"></textarea>
+            <div class="flex-actions mt-4">
+              <button @click="executeSimulateAction('SEND')" class="btn btn-primary flex-1">发送报文</button>
+              <button @click="executeSimulateAction('DISCONNECT')" class="btn btn-danger">断开连接</button>
+              <button @click="showSimulatorModal = false" class="btn btn-secondary">关闭</button>
             </div>
           </div>
-          
-          <div class="modal-actions simulate-actions">
-            <button @click="executeSimulateAction('SEND')" class="confirm-btn" :disabled="!simulatingDevice">
-              发送报文
-            </button>
-            <button @click="executeSimulateAction('DISCONNECT')" class="close-modal-btn">
-              断开连接
-            </button>
-          </div>
         </div>
-        
       </div>
-    </div>
+    </CommonModal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, defineProps } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import config from '../config/config';
+import CommonModal from '../components/CommonModal.vue';
+import { notificationStore } from '../notification';
 
 const currentTab = ref('registration');
 const devices = ref([]);
@@ -377,578 +285,199 @@ const deviceTypes = ref([]);
 const selectedType = ref('');
 const showModal = ref(false);
 const selectedDevice = ref(null);
-
 const showCreateModal = ref(false);
 const newDeviceType = ref('');
 const templateDevice = ref(null);
-
-const showCustomModal = ref(false);
-const modalTitle = ref('');
-const modalContent = ref('');
-const modalConfirmAction = ref(null);
-
 const BASE_URL = config.BASE_URL+'/deviceControl';
-const SUCCESS_CODE = 200; // 假设后端业务成功码是 200
-
-const showSimulatorModal = ref(false); // 模拟器主弹窗
-const simulatingDevice = ref(null);    // 当前正在操作的设备对象
-
+const SUCCESS_CODE = 200;
+const showSimulatorModal = ref(false);
+const simulatingDevice = ref(null);
 const simulatorForm = ref({
-    // ⚠️ 使用 deviceId 替换 deviceIdentifier
-    id: null,
-    choice: null, 
-    // 记录连接成功的 IP、Port 和 Type
-    connectedIP: '',
-    connectedPort: null,
-    connectedType: '',
-
-    ip: '',   // 输入框的临时值
-    port: null, // 输入框的临时值
-    type: '', 
-    // ❗ 【修改点 2】删除 topic 字段
-    payload: '',
-    data: '',
+    deviceId: null, connectedIP: '', connectedPort: null, connectedType: '',
+    ip: '', port: null, type: '', payload: '', data: '',
 });
-
-const simulatorTypeOptions = ref([]);  // 从 BASE_URL/server/getAllTypes 获取
-
-// 报文相关状态 (仅用于 TCPo)
-const tcpDataFormat = ref('plaintext'); // 'plaintext' 或 'hex'
-
+const simulatorTypeOptions = ref([]);
+const tcpDataFormat = ref('plaintext');
 const connectedDevices = ref([]);
 const showConnectModal = ref(false);
 const showChangeInfoModal = ref(false);
 const how2decodeOptions = ref([]);
 const decode2whatOptions = ref([]);
-
 const connectForm = ref({
-    connectionMethod: 'TCP',
-    ip: '',
-    port: null,
-    bufferProcessMode: 'DELIMITED',
-    script: null,
-    how2decode: '',
-    decode2what: ''
+    connectionMethod: 'TCP', ip: '', port: null, bufferProcessMode: 'DELIMITED',
+    script: null, how2decode: '', decode2what: ''
 });
-
 const changeInfoForm = ref({
-    deviceId: '',
-    deviceCat: '',
-    deviceStates: '',
-    ipAndPort: '',
-    connectionId: ''
+    deviceId: '', deviceCat: '', deviceStates: '', ipAndPort: '', connectionId: ''
 });
-
-// ⚠️ 连接状态，key: device.id, value: boolean (true=已连接)
 const simulatorStatus = ref({}); 
 
-// 通用消息提示函数
-const showMessage = (title, content) => {
-    modalTitle.value = title;
-    modalContent.value = content;
-    modalConfirmAction.value = null;
-    showCustomModal.value = true;
-};
-
-// 通用确认提示函数
-const showConfirmation = (title, content, action) => {
-    modalTitle.value = title;
-    modalContent.value = content;
-    modalConfirmAction.value = action;
-    showCustomModal.value = true;
-};
-
-// 执行确认操作
-const performConfirmedAction = () => {
-    if (modalConfirmAction.value) {
-        modalConfirmAction.value();
-    }
-    closeCustomModal();
-};
-
-// 关闭自定义模态窗口
-const closeCustomModal = () => {
-    showCustomModal.value = false;
-    modalTitle.value = '';
-    modalContent.value = '';
-    modalConfirmAction.value = null;
-};
-
-// 时间格式化函数
 const formatTime = (timeValue) => {
     if (!timeValue) return 'N/A';
     try {
-        if (typeof timeValue === 'string') {
-             return timeValue.replace('T', ' ').split('.')[0];
-        } 
-        const date = new Date(timeValue);
-        return date.toLocaleString();
-    } catch (e) {
-        return String(timeValue);
-    }
+        return typeof timeValue === 'string' ? timeValue.replace('T', ' ').split('.')[0] : new Date(timeValue).toLocaleString();
+    } catch (e) { return String(timeValue); }
 };
 
-defineProps({
-    title: {
-        type: String,
-        default: '设备管理'
-    }
-});
-
 watch(tcpDataFormat, (newFormat, oldFormat) => {
-    // 只有在 data 字段有内容时才进行转换
     if (simulatorForm.value.data) {
         if (newFormat === 'plaintext' && oldFormat === 'hex') {
-            // Hex -> 明文
             const cleanHex = simulatorForm.value.data.replace(/\s/g, '');
             simulatorForm.value.data = hexToPlaintext(cleanHex);
         } else if (newFormat === 'hex' && oldFormat === 'plaintext') {
-            // 明文 -> Hex
             simulatorForm.value.data = plaintextToHex(simulatorForm.value.data);
         }
     }
 });
 
-/**
- * 监听模拟器类型变化，重置表单部分字段
- */
-watch(() => simulatorForm.value.type, (newType) => {
-    // 确保报文类型和数据格式一致
-    tcpDataFormat.value = 'plaintext';
-    // ❗ 【修改点 3】删除对 topic 的重置
-    simulatorForm.value.payload = '';
-    simulatorForm.value.data = '';
-});
-
-/**
- * 获取所有设备种类
- */
 const fetchDeviceTypes = async () => {
     try {
         const response = await axios.get(`${BASE_URL}/getAllDeviceTypes`);
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-            deviceTypes.value = response.data.data || [];
-        } else {
-            console.error('获取设备种类失败:', response.data.message);
-            showMessage('错误', response.data.message || '获取设备种类失败。');
-        }
-    } catch (error) {
-        console.error('获取设备种类失败:', error);
-        showMessage('错误', '获取设备种类失败，请检查网络或服务器状态。');
-    }
+        if (response.data.code === SUCCESS_CODE) deviceTypes.value = response.data.data || [];
+    } catch (error) { notificationStore.error('获取设备种类失败'); }
 };
 
-/**
- * 获取所有设备或根据类型查询
- */
 const fetchDevices = async (type = '') => {
     try {
         const url = type ? `${BASE_URL}/getDevicesByType?type=${type}` : `${BASE_URL}/getAllDevices`;
         const response = await axios.get(url);
-        
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-            devices.value = response.data.data || [];
-        } else {
-            console.error('获取设备列表失败:', response.data.message);
-            devices.value = [];
-            showMessage('错误', response.data.message || '获取设备列表失败。');
-        }
-    } catch (error) {
-        console.error('获取设备列表失败:', error);
-        devices.value = [];
-        showMessage('错误', '获取设备列表失败，请检查网络或服务器状态。');
-    }
+        if (response.data.code === SUCCESS_CODE) devices.value = response.data.data || [];
+    } catch (error) { notificationStore.error('获取设备列表失败'); }
 };
 
-// 搜索按钮点击事件
-const searchDevices = () => {
-    // 搜索时依然需要检查新列表设备的状态
-    fetchDevicesAndStatus(selectedType.value); 
-};
+const searchDevices = () => fetchDevicesAndStatus(selectedType.value);
 
-// 详情按钮点击事件
 const showDetails = (device) => {
     selectedDevice.value = device;
     showModal.value = true;
 };
 
-// 打开新建设备弹窗
 const openCreateModal = () => {
-    showCreateModal.value = true;
     newDeviceType.value = '';
     templateDevice.value = null;
+    showCreateModal.value = true;
 };
 
-// 关闭新建设备弹窗
-const closeCreateModal = () => {
-    showCreateModal.value = false;
-};
-
-/**
- * 根据设备类型获取模板
- */
 const fetchTemplate = async () => {
-    if (!newDeviceType.value) {
-        templateDevice.value = null;
-        return;
-    }
+    if (!newDeviceType.value) return;
     try {
-        const url = `${BASE_URL}/getTemplateDeviceByType?type=${newDeviceType.value}`;
-        const response = await axios.get(url);
-        
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-            templateDevice.value = response.data.data;
-            // ⚠️ 移除对 deviceIdentifier 的处理
-            // if (!templateDevice.value.deviceIdentifier) {
-            //     templateDevice.value.deviceIdentifier = ''; 
-            // }
-        } else {
-            console.error('获取设备模板失败:', response.data.message);
-            showMessage('错误', response.data.message || '获取设备模板失败。');
-            templateDevice.value = null;
-        }
-    } catch (error) {
-        console.error('获取设备模板失败:', error);
-        showMessage('错误', '获取设备模板失败，请检查类型或网络。');
-        templateDevice.value = null;
-    }
+        const response = await axios.get(`${BASE_URL}/getTemplateDeviceByType?type=${newDeviceType.value}`);
+        if (response.data.code === SUCCESS_CODE) templateDevice.value = response.data.data;
+    } catch (error) { notificationStore.error('获取模板失败'); }
 };
 
-/**
- * 提交新设备
- */
 const submitNewDevice = async () => {
-    if (!newDeviceType.value || !templateDevice.value) {
-        showMessage('提示', '请选择设备种类并填写完整信息！');
-        return;
-    }
-    
-    // ⚠️ 删除了 deviceIdentifier 不能为空的校验
-
-    const payload = {
-        type: newDeviceType.value,
-        device: { ...templateDevice.value }
-    };
-    
-    // 移除由后端处理的字段
+    const payload = { type: newDeviceType.value, device: { ...templateDevice.value } };
     delete payload.device.id;
     delete payload.device.createTime;
-
     try {
-        const url = `${BASE_URL}/createNewDeviceByType`;
-        const response = await axios.post(url, payload);
-        
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-            showMessage('成功', '设备创建成功！');
-            closeCreateModal();
+        const response = await axios.post(`${BASE_URL}/createNewDeviceByType`, payload);
+        if (response.data.code === SUCCESS_CODE) {
+            notificationStore.success('设备创建成功');
+            showCreateModal.value = false;
             fetchDevices();
-        } else {
-            console.error('设备创建失败:', response.data.message);
-            showMessage('失败', response.data.message || '设备创建失败：未知错误。');
         }
-    } catch (error) {
-        console.error('创建设备失败:', error);
-        const errorMessage = error.response?.data?.message || '创建设备失败，请检查输入或网络。';
-        showMessage('创建设备失败', errorMessage);
-    }
+    } catch (error) { notificationStore.error('创建设备失败'); }
 };
 
-// 确认删除设备
 const confirmDelete = (device) => {
-    showConfirmation(
-        '确认删除',
-        // ⚠️ 使用 device.id 替换 device.deviceIdentifier
-        `你确定要删除设备 "${device.name}" (ID: ${device.id}) 吗？`,
-        () => deleteDevice(device)
-    );
+    if (confirm(`确定要删除设备 "${device.name}" 吗？`)) deleteDevice(device);
 };
 
-/**
- * 删除设备
- */
 const deleteDevice = async (device) => {
     try {
-        const url = `${BASE_URL}/deleteDeviceByTypeAndId/${device.type}/${device.id}`;
-        const response = await axios.delete(url);
-
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-            showMessage('成功', '设备删除成功！');
+        const response = await axios.delete(`${BASE_URL}/deleteDeviceByTypeAndId/${device.type}/${device.id}`);
+        if (response.data.code === SUCCESS_CODE) {
+            notificationStore.success('设备删除成功');
             fetchDevices();
-        } else {
-            console.error('设备删除失败:', response.data.message);
-            showMessage('失败', response.data.message || '设备删除失败：未知错误。');
         }
-    } catch (error) {
-        console.error('删除设备失败:', error);
-        const errorMessage = error.response?.data?.message || '删除设备失败，请检查网络。';
-        showMessage('删除设备失败', errorMessage);
-    }
+    } catch (error) { notificationStore.error('删除失败'); }
 };
 
-/**
- * 检查模拟器状态
- */
 const checkSimulatorStatus = async (deviceId) => {
     try {
-        // ⚠️ 使用 id 替换 deviceIdentifier 作为查询参数
-        const url = `${BASE_URL}/checkSimulatorStatus?id=${deviceId}`;
-        const response = await axios.get(url);
-
-        // 假设后端返回 {status: true/false, ip: '...', port: 1234, type: 'TCPo'}
+        const response = await axios.get(`${BASE_URL}/checkSimulatorStatus?id=${deviceId}`);
         const data = response.data.data;
-        const isConnected = data.status === true;
-
-        // ⚠️ 使用 deviceId 作为 key
-        simulatorStatus.value[deviceId] = isConnected; 
-
-        // 关键修改：更新持久化的 IP/Port/Type 状态
-        if (isConnected) {
+        simulatorStatus.value[deviceId] = data.status === true;
+        if (data.status) {
             simulatorForm.value.connectedIP = data.ip || '';
             simulatorForm.value.connectedPort = data.port || null;
-
-            // ⚠️ 新增/修正：后端类型 ('TCPo') -> 前端类型 ('TCP-only')
-            let uiType = data.type || '';
-            if (uiType === 'TCPo') {
-                uiType = 'TCP-only';
-            }
-            simulatorForm.value.connectedType = uiType;
-        } else {
-            simulatorForm.value.connectedIP = '';
-            simulatorForm.value.connectedPort = null;
-            simulatorForm.value.connectedType = '';
+            simulatorForm.value.connectedType = data.type === 'TCPo' ? 'TCP-only' : (data.type || '');
         }
-
-    } catch (error) {
-        console.error(`检查设备 ${deviceId} 连接状态失败:`, error);
-        // ⚠️ 使用 deviceId 作为 key
-        simulatorStatus.value[deviceId] = false;
-        // 确保失败时清空持久化状态
-        simulatorForm.value.connectedIP = '';
-        simulatorForm.value.connectedPort = null;
-        simulatorForm.value.connectedType = '';
-    }
+    } catch (error) { simulatorStatus.value[deviceId] = false; }
 };
 
-/**
- * 模拟器入口：点击 "模拟设备行为"
- */
 const simulateBehavior = async (device) => {
     simulatingDevice.value = device;
-    // ⚠️ 使用 deviceId 替换 deviceIdentifier
     simulatorForm.value.deviceId = device.id;
-    
-    // 必须在打开弹窗前调用，从后端获取最新的连接状态
     await checkSimulatorStatus(device.id); 
-
-    // ⚠️ 使用 device.id 检查连接状态
-    const isConnected = simulatorStatus.value[device.id] === true;
-    
-    // 2. 获取所有可用类型
     await fetchSimulatorTypes(); 
-    
-    // 3. 填充表单基础信息
-    if (isConnected) {
-        // 如果已连接，使用持久化状态填充，保证弹窗能正确显示连接信息和发送面板
+    if (simulatorStatus.value[device.id]) {
         simulatorForm.value.ip = simulatorForm.value.connectedIP;
         simulatorForm.value.port = simulatorForm.value.connectedPort;
         simulatorForm.value.type = simulatorForm.value.connectedType;
     } else {
-        // 如果未连接，清空输入框
-        simulatorForm.value.ip = '';
-        simulatorForm.value.port = null;
-        simulatorForm.value.type = ''; 
+        simulatorForm.value.ip = ''; simulatorForm.value.port = null; simulatorForm.value.type = '';
     }
-
-    // 清空报文相关字段
-    // ❗ 【修改点 3.1】删除对 topic 的清空
-    simulatorForm.value.payload = '';
-    simulatorForm.value.data = '';
+    simulatorForm.value.payload = ''; simulatorForm.value.data = '';
     tcpDataFormat.value = 'plaintext'; 
-    
-    // 4. 显示弹窗
     showSimulatorModal.value = true;
 };
 
-/**
- * 获取模拟器类型 (复用 /server/getAllTypes)
- */
 const fetchSimulatorTypes = async () => {
-      try {
-        const response = await axios.get(`${config.BASE_URL}/server/getAllTypes`);
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-            // 过滤出我们需要的类型，并确保它们是 MQTT 和 TCP-only (对应后端变量 MQTT/TCPo)
-            simulatorTypeOptions.value = response.data.data.filter(type => 
-                type === 'MQTT' || type === 'TCP-only'
-            );
-        }
-    } catch (error) {
-        console.error('获取模拟器类型失败:', error);
-    }
-}
-
-
-/**
- * 执行模拟器操作 (连接/断开/发送)
- */
-const executeSimulateAction = async (choice) => {
-    const form = simulatorForm.value;
-    
-    // 1. ⚠️ 使用 id 替换 deviceIdentifier
-    const payload = {
-        id: form.deviceId,
-        choice: choice,
-        ip: null,
-        port: null,
-        type: null,
-    };
-
-    // 2. 连接/断开逻辑
-    if (choice === 'CONNECT' || choice === 'DISCONNECT') {
-        // CONNECT 使用输入框值，DISCONNECT 使用已连接的持久化值
-        const targetIP = (choice === 'CONNECT') ? form.ip : form.connectedIP;
-        const targetPort = (choice === 'CONNECT') ? form.port : form.connectedPort;
-        const targetType = (choice === 'CONNECT') ? form.type : form.connectedType;
-
-        if (!targetIP || !targetPort) {
-            // ⚠️ 使用 id 检查连接状态
-            if (choice === 'DISCONNECT' && !simulatorStatus.value[form.deviceId]) {
-                closeSimulatorModal();
-                return;
-            }
-            showMessage('校验错误', `${choice} 操作需要 IP 和端口！`);
-            return;
-        }
-        payload.ip = targetIP;
-        payload.port = targetPort;
-        // 确保 payload 的 type 是正确的 (TCP-only -> TCPo)
-        payload.type = targetType === 'TCP-only' ? 'TCPo' : targetType;
-    }
-
-    // 3. SEND 逻辑
-    if (choice === 'SEND') {
-        // ⚠️ 使用 id 检查连接状态
-        if (!simulatorStatus.value[form.deviceId]) {
-            showMessage('警告', '请先连接到服务器才能发送报文。');
-            return;
-        }
-
-        // 使用已连接的持久化状态构建 payload
-        payload.ip = form.connectedIP;
-        payload.port = form.connectedPort;
-        const connectedType = form.connectedType;
-        
-        // 确保 payload.type 是正确的 (TCP-only -> TCPo)
-        payload.type = connectedType === 'TCP-only' ? 'TCPo' : connectedType;
-
-        if (connectedType === 'MQTT') {
-            // ❗ 【修改点 4】删除对 topic 的校验和添加
-            if (!form.payload) {
-                showMessage('校验错误', 'MQTT 报文需要 Payload！');
-                return;
-            }
-            // 假设服务器会根据设备 ID 自动分配或使用默认 Topic
-            // payload.topic = form.topic; // <-- 删除
-            payload.payload = form.payload; // 明文
-        } else if (connectedType === 'TCP-only') {
-            if (!form.data) {
-                showMessage('校验错误', 'TCPo 报文需要数据内容！');
-                return;
-            }
-            
-            // 报文格式处理 (plaintext 或 hex)
-            if (tcpDataFormat.value === 'hex') {
-                // 如果是 Hex 格式，需要清理空格并进行校验，假设后端需要 Hex 字符串
-                const cleanedData = form.data.replace(/\s+/g, '');
-                if (!/^[0-9a-fA-F]*$/.test(cleanedData)) {
-                    showMessage('校验错误', 'Hex 报文包含无效字符。');
-                    return;
-                }
-                payload.data = cleanedData;
-                payload.dataFormat = 'hex';
-            } else {
-                // 明文
-                payload.data = form.data;
-                payload.dataFormat = 'plaintext';
-            }
-        }
-    }
-    
-    // 4. 发送请求
     try {
-        const response = await axios.post(`${BASE_URL}/simulateDeviceBehaviour`, payload);
-
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-
-            // ⚠️ 更新连接状态和持久化 IP/Port
-            if (choice === 'CONNECT') {
-                // ⚠️ 使用 id 替换 deviceIdentifier
-                simulatorStatus.value[form.deviceId] = true;
-                // 保存连接成功的 IP/Port/Type 到持久化状态
-                form.connectedIP = form.ip; 
-                form.connectedPort = form.port;
-                form.connectedType = form.type;
-            } else if (choice === 'DISCONNECT') {
-                showMessage('断开连接成功', '已断开连接。');
-                // ⚠️ 使用 id 替换 deviceIdentifier
-                simulatorStatus.value[form.deviceId] = false;
-                // 清空所有状态
-                form.connectedIP = '';
-                form.connectedPort = null;
-                form.connectedType = '';
-                form.ip = ''; 
-                form.port = null;
-                form.type = ''; 
-                // 断开连接后关闭弹窗
-                closeSimulatorModal(); 
-            } else{
-                showMessage('成功', `${choice} 操作成功！`);
-            }
-            
-        } else {
-            showMessage('操作失败', response.data.message || `${choice} 操作失败，请检查服务器日志。`);
+        const response = await axios.get(`${config.BASE_URL}/server/getAllTypes`);
+        if (response.data.code === SUCCESS_CODE) {
+            simulatorTypeOptions.value = response.data.data.filter(t => t === 'MQTT' || t === 'TCP-only');
         }
-    } catch (error) {
-        console.error(`${choice} 操作请求失败:`, error);
-        showMessage('请求错误', `无法执行 ${choice} 操作。`);
-    }
+    } catch (error) { console.error(error); }
 };
 
-/**
- * 关闭模拟器弹窗 (不执行断开连接)
- */
-const closeSimulatorModal = () => {
-    showSimulatorModal.value = false
-    // 模态框关闭时不改变连接状态
+const executeSimulateAction = async (choice) => {
+    const form = simulatorForm.value;
+    const payload = { id: form.deviceId, choice, ip: null, port: null, type: null };
+    if (choice === 'CONNECT' || choice === 'DISCONNECT') {
+        payload.ip = choice === 'CONNECT' ? form.ip : form.connectedIP;
+        payload.port = choice === 'CONNECT' ? form.port : form.connectedPort;
+        const t = choice === 'CONNECT' ? form.type : form.connectedType;
+        payload.type = t === 'TCP-only' ? 'TCPo' : t;
+        if (!payload.ip || !payload.port) { notificationStore.warning('需要 IP 和端口'); return; }
+    }
+    if (choice === 'SEND') {
+        payload.ip = form.connectedIP; payload.port = form.connectedPort;
+        payload.type = form.connectedType === 'TCP-only' ? 'TCPo' : form.connectedType;
+        if (form.connectedType === 'MQTT') payload.payload = form.payload;
+        else if (form.connectedType === 'TCP-only') {
+            payload.data = tcpDataFormat.value === 'hex' ? form.data.replace(/\s+/g, '') : form.data;
+            payload.dataFormat = tcpDataFormat.value;
+        }
+    }
+    try {
+        const response = await axios.post(`${BASE_URL}/simulateDeviceBehaviour`, payload);
+        if (response.data.code === SUCCESS_CODE) {
+            if (choice === 'CONNECT') {
+                simulatorStatus.value[form.deviceId] = true;
+                form.connectedIP = form.ip; form.connectedPort = form.port; form.connectedType = form.type;
+                notificationStore.success('连接成功');
+            } else if (choice === 'DISCONNECT') {
+                simulatorStatus.value[form.deviceId] = false;
+                notificationStore.info('已断开连接');
+                showSimulatorModal.value = false;
+            } else notificationStore.success('发送成功');
+        } else notificationStore.error(response.data.message || '操作失败');
+    } catch (error) { notificationStore.error('请求失败'); }
 };
 
 const fetchConnectedDevices = async () => {
     try {
         const response = await axios.get(`${config.BASE_URL}/deviceControl/getAllConnectedDeviceStates`);
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-            connectedDevices.value = response.data.data || [];
-        } else {
-            showMessage('错误', response.data.message || '获取已连接设备失败');
-        }
-    } catch (error) {
-        console.error('获取已连接设备失败:', error);
-        showMessage('错误', '网络错误，获取已连接设备失败');
-    }
+        if (response.data.code === SUCCESS_CODE) connectedDevices.value = response.data.data || [];
+    } catch (error) { notificationStore.error('获取失败'); }
 };
 
 const openConnectModal = async () => {
+    connectForm.value = { connectionMethod: 'TCP', ip: '', port: null, bufferProcessMode: 'DELIMITED', script: null, how2decode: '', decode2what: '' };
     showConnectModal.value = true;
-    // Reset form
-    connectForm.value = {
-        connectionMethod: 'TCP',
-        ip: '',
-        port: null,
-        bufferProcessMode: 'DELIMITED',
-        script: null,
-        how2decode: '',
-        decode2what: ''
-    };
-
-    // Fetch options
     try {
         const [howRes, whatRes] = await Promise.all([
             axios.get(`${config.BASE_URL}/server/getAllHow2decode`),
@@ -956,35 +485,18 @@ const openConnectModal = async () => {
         ]);
         if (howRes.data.code === SUCCESS_CODE) how2decodeOptions.value = howRes.data.data || [];
         if (whatRes.data.code === SUCCESS_CODE) decode2whatOptions.value = whatRes.data.data || [];
-    } catch (error) {
-        console.error('获取解码选项失败:', error);
-    }
+    } catch (error) { console.error(error); }
 };
 
 const submitConnect = async () => {
-    if (connectForm.value.connectionMethod === 'TCP') {
-        try {
-            const payload = {
-                ip: connectForm.value.ip,
-                port: connectForm.value.port,
-                bufferProcessMode: connectForm.value.bufferProcessMode,
-                script: connectForm.value.script,
-                how2decode: connectForm.value.how2decode,
-                decode2what: connectForm.value.decode2what
-            };
-            const response = await axios.post(`${config.BASE_URL}/deviceControl/ConnectDeviceByTCPo`, payload);
-            if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-                showMessage('成功', '连接成功');
-                showConnectModal.value = false;
-                fetchConnectedDevices();
-            } else {
-                showMessage('失败', response.data.message || '连接失败');
-            }
-        } catch (error) {
-            console.error('连接请求失败:', error);
-            showMessage('错误', '网络错误，连接失败');
+    try {
+        const response = await axios.post(`${config.BASE_URL}/deviceControl/ConnectDeviceByTCPo`, connectForm.value);
+        if (response.data.code === SUCCESS_CODE) {
+            notificationStore.success('连接成功');
+            showConnectModal.value = false;
+            fetchConnectedDevices();
         }
-    }
+    } catch (error) { notificationStore.error('连接失败'); }
 };
 
 const openChangeInfoModal = (device) => {
@@ -995,417 +507,90 @@ const openChangeInfoModal = (device) => {
 const submitChangeInfo = async () => {
     try {
         const response = await axios.post(`${config.BASE_URL}/deviceControl/ChangeConnectedDeviceInformation`, changeInfoForm.value);
-        if (response.status === 200 && response.data.code === SUCCESS_CODE) {
-            showMessage('成功', '更改信息成功');
+        if (response.data.code === SUCCESS_CODE) {
+            notificationStore.success('更新成功');
             showChangeInfoModal.value = false;
             fetchConnectedDevices();
-        } else {
-            showMessage('失败', response.data.message || '更改失败');
         }
-    } catch (error) {
-        console.error('更改信息失败:', error);
-        showMessage('错误', '网络错误，更改信息失败');
-    }
+    } catch (error) { notificationStore.error('更新失败'); }
 };
 
-
-// 页面加载时自动获取设备种类和所有设备
-onMounted(async () => {
-    await fetchDeviceTypes();
-    // 修改：调用新的函数以检查状态
-    await fetchDevicesAndStatus(); 
-});
-
-// 覆盖原有的 fetchDevices 以便在获取列表后检查状态
 const fetchDevicesAndStatus = async (type = '') => {
     await fetchDevices(type);
-    
-    // 异步检查所有设备的模拟器状态
-    devices.value.forEach(device => {
-        // ⚠️ 检查状态现在使用 device.id
-        setTimeout(() => {
-            checkSimulatorStatus(device.id);
-        }, 0);
-    });
+    devices.value.forEach(d => checkSimulatorStatus(d.id));
 };
 
-// 页面加载时自动获取设备种类和所有设备
 onMounted(async () => {
-    await fetchDevicesAndStatus(); 
+    await fetchDeviceTypes();
+    await fetchDevicesAndStatus();
 });
 
-const hexToPlaintext = (hexString) => {
+const hexToPlaintext = (hex) => {
     try {
-        const cleanHex = hexString.replace(/\s/g, '');
-        if (cleanHex.length % 2 !== 0) return hexString; // 长度不对，返回原值
-
-        // 将 Hex 字符串转换为 Uint8Array 字节数组
         const bytes = [];
-        for (let i = 0; i < cleanHex.length; i += 2) {
-            bytes.push(parseInt(cleanHex.substring(i, i + 2), 16));
-        }
-        const uint8Array = new Uint8Array(bytes);
-
-        // 使用 TextDecoder (默认 UTF-8) 解码为字符串
-        const decoder = new TextDecoder('utf-8');
-        return decoder.decode(uint8Array);
-    } catch (e) {
-        console.error("HexToPlaintext Error:", e);
-        return hexString; // 转换失败时返回原输入，防止数据丢失
-    }
+        for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substring(i, i + 2), 16));
+        return new TextDecoder().decode(new Uint8Array(bytes));
+    } catch (e) { return hex; }
 };
 
-/**
- * 将 Plaintext 字符串转换为 Hex 字符串 (UTF-8)
- * 输入: "Payload"
- * 输出: "50 61 79 6C 6F 61 64" (带空格)
- */
 const plaintextToHex = (text) => {
     try {
-        // 使用 TextEncoder (默认 UTF-8) 编码为 Uint8Array
-        const encoder = new TextEncoder();
-        const utf8Bytes = encoder.encode(text);
-        
-        let hex = '';
-        for (const byte of utf8Bytes) {
-            hex += byte.toString(16).padStart(2, '0');
-        }
-        // 按用户需求的格式 (带空格分隔)
-        return hex.toUpperCase().match(/.{1,2}/g)?.join(' ') || '';
-    } catch (e) {
-        console.error("PlaintextToHex Error:", e);
-        return text; // 转换失败时返回原输入
-    }
+        return Array.from(new TextEncoder().encode(text)).map(b => b.toString(16).padStart(2, '0')).join(' ').toUpperCase();
+    } catch (e) { return text; }
 };
-
 </script>
 
 <style scoped>
-/* 样式保持不变 */
-.device-management-page {
-  font-family: Arial, sans-serif;
-}
-
-.tab-switcher {
+.tab-nav {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  background-color: #f1f3f5;
-  border-radius: 8px;
+  gap: 1rem;
 }
 
-.tab-switcher button {
-  background-color: #e9ecef;
-  color: #495057;
-  border: 1px solid #dee2e6;
-  padding: 10px 20px;
-  font-weight: bold;
-}
-
-.tab-switcher button.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.management-top-panel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.active-connect-btn {
-  background-color: #17a2b8;
-}
-
-.active-connect-btn:hover {
-  background-color: #138496;
-}
-
-.status-tag {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.status-tag.online {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-tag.offline {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.todo-info {
-  color: #856404;
-  background-color: #fff3cd;
-  padding: 5px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-top: 5px;
-}
-
-.search-panel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.search-form {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-select {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-button {
-  padding: 8px 16px;
+.tab-btn {
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
   cursor: pointer;
-  background-color: #007bff;
-  color: white;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
 }
 
-button:hover {
-  background-color: #0056b3;
+.tab-btn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
 }
 
-.new-device-btn {
-  background-color: #28a745;
-}
-
-.new-device-btn:hover {
-  background-color: #218838;
-}
-
-.device-list {
-  padding: 20px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-th, td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: left;
-}
-
-th {
-  background-color: #f2f2f2;
-}
-
-.action-buttons {
-  white-space: nowrap;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
-}
-
-.simulate-btn {
-  background-color: #6c757d;
-}
-
-.simulate-btn:hover {
-  background-color: #5a6268;
-}
-
-.no-data {
-  text-align: center;
-  color: #888;
-}
-
-/* 弹窗样式 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-overlay.top-level-overlay {
-    z-index: 1010; /* 设置一个更高的值，确保覆盖所有其他模态框 */
-}
-
-.modal {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 600px;
-  max-width: 90%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  position: relative;
-}
-
-.modal.message-modal {
-  width: 400px;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-.action-buttons button {
-  padding: 6px 10px;
-  font-size: 12px;
-  margin-right: 5px;
-}
-
-.close-btn {
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.modal-body pre {
-  background: #f4f4f4;
-  padding: 15px;
-  border-radius: 4px;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-/* 新增设备表单样式 */
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
+.status-dot {
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
-.form-group input, .form-group select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
+.status-dot.online { background-color: var(--success-color); box-shadow: 0 0 5px var(--success-color); }
+.status-dot.offline { background-color: var(--danger-color); }
 
-.submit-btn, .confirm-btn, .close-modal-btn {
-  width: 100%;
-  padding: 12px;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 20px;
-}
+.flex-actions { display: flex; gap: 0.5rem; }
 
-.submit-btn {
-  background-color: #28a745;
-}
+.ml-auto { margin-left: auto; }
 
-.submit-btn:hover:not(:disabled) {
-  background-color: #218838;
-}
+.details-pre { background: #f1f5f9; padding: 1rem; border-radius: 8px; font-size: 0.8rem; }
 
-.submit-btn:disabled {
-  background-color: #a0a0a0;
-  cursor: not-allowed;
-}
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
+.simulator-box { padding: 0.5rem; }
 
-.modal-actions button {
-  width: auto;
-  flex: 1;
-}
+.status-banner { padding: 0.75rem; background: #dcfce7; color: #166534; border-radius: 8px; font-weight: 600; text-align: center; }
 
-.confirm-btn {
-  background-color: #28a745;
-}
+.radio-group-row { display: flex; gap: 1.5rem; margin-top: 0.25rem; }
 
-.close-modal-btn {
-  background-color: #6c757d;
-}
+.radio-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; }
 
-.action-buttons {
-    display: flex; 
-    align-items: center;
-    gap: 5px; 
-    white-space: nowrap;
-}
+.w-full { width: 100%; }
 
-/* 模拟器状态指示灯样式 */
-.status-indicator {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: 5px;
-    border: 1px solid #999; 
-}
+.flex-1 { flex: 1; }
 
-.status-indicator.connected {
-    background-color: #28aa46; 
-    border-color: #218838;
-}
-
-.status-indicator.disconnected {
-    background-color: #c82333; 
-    border-color: #dc3545;
-}
-
-/* 调整操作按钮样式，确保它们在 flex 容器中正常显示 */
-.action-buttons button {
-    margin: 0; 
-}
-.horizontal-radio-group label {
-    /* 强制标签内的元素 (input 和 text) 在同一行垂直居中对齐 */
-    display: flex;
-    align-items: center;
-    gap: 5px; 
-    cursor: pointer; 
-}
-
-.horizontal-radio-group input[type="radio"] {
-    /* 确保 radio 按钮不会被额外的样式影响，通常不需要 margin */
-    margin: 0; 
-    /* 确保 radio 按钮位于文字之前 */
-    order: 1; 
-}
+.font-mono { font-family: ui-monospace, monospace; }
 </style>
