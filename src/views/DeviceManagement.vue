@@ -8,11 +8,13 @@
 
       <div v-if="currentTab === 'registration'">
         <div class="search-panel">
-          <input type="text" class="form-input w-64" placeholder="请输入检索内容" v-model="selectedType" />
+          <select class="form-select w-64" v-model="pageParam.param">
+            <option value="">全部类型</option>
+            <option v-for="type in deviceTypes" :key="type" :value="type">{{ type }}</option>
+          </select>
           <button @click="searchDevices" class="btn btn-primary">查询</button>
-          <button @click="selectedType = ''; searchDevices()" class="btn btn-secondary">重置</button>
+          <button @click="pageParam.param = ''; searchDevices()" class="btn btn-secondary">重置</button>
           <button @click="openCreateModal" class="btn btn-success ml-auto">+ 创建</button>
-          <button class="btn btn-danger" disabled>删除</button>
         </div>
       </div>
 
@@ -57,6 +59,13 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination controls -->
+        <div class="pagination mt-4 flex items-center justify-center gap-4" v-if="totalPages > 1">
+          <button @click="changePage(pageParam.pageNo - 1)" :disabled="pageParam.pageNo <= 1" class="btn btn-sm btn-secondary">上一页</button>
+          <span class="text-sm">第 {{ pageParam.pageNo }} / {{ totalPages }} 页</span>
+          <button @click="changePage(pageParam.pageNo + 1)" :disabled="pageParam.pageNo >= totalPages" class="btn btn-sm btn-secondary">下一页</button>
+        </div>
       </div>
 
       <div v-else-if="currentTab === 'connected'" class="table-container">
@@ -94,7 +103,7 @@
       </div>
     </div>
 
-    <!-- Modals (rest of logic remains same but using refined CommonModal) -->
+    <!-- Modals -->
     <CommonModal v-model="showModal" title="设备详情" :showConfirm="false" cancelText="关闭">
       <pre class="details-pre">{{ JSON.stringify(selectedDevice, null, 2) }}</pre>
     </CommonModal>
@@ -253,7 +262,13 @@ import { notificationStore } from '../notification';
 const currentTab = ref('registration');
 const devices = ref([]);
 const deviceTypes = ref([]);
-const selectedType = ref('');
+const totalPages = ref(0);
+const pageParam = ref({
+    pageNo: 1,
+    pageSize: 10,
+    param: ''
+});
+
 const showModal = ref(false);
 const selectedDevice = ref(null);
 const showCreateModal = ref(false);
@@ -308,15 +323,33 @@ const fetchDeviceTypes = async () => {
     } catch (error) { notificationStore.error('获取设备种类失败'); }
 };
 
-const fetchDevices = async (type = '') => {
+const fetchDevices = async () => {
     try {
-        const url = type ? `${BASE_URL}/getDevicesByType?type=${type}` : `${BASE_URL}/getAllDevices`;
-        const response = await axios.get(url);
-        if (response.data.code === SUCCESS_CODE) devices.value = response.data.data || [];
+        const type = pageParam.value.param;
+        const url = type ? `${BASE_URL}/getDevicesPageByType` : `${BASE_URL}/getAllDevicesPage`;
+        // As per requirement, use @RequestBody for GET. Axios doesn't support body in .get(), using .request instead.
+        const response = await axios.request({
+            method: 'get',
+            url: url,
+            data: pageParam.value
+        });
+        if (response.data.code === SUCCESS_CODE) {
+            devices.value = response.data.data.list || [];
+            totalPages.value = response.data.data.pages || 0;
+            devices.value.forEach(d => checkSimulatorStatus(d.id));
+        }
     } catch (error) { notificationStore.error('获取设备列表失败'); }
 };
 
-const searchDevices = () => fetchDevicesAndStatus(selectedType.value);
+const searchDevices = () => {
+    pageParam.value.pageNo = 1;
+    fetchDevices();
+};
+
+const changePage = (page) => {
+    pageParam.value.pageNo = page;
+    fetchDevices();
+};
 
 const showDetails = (device) => {
     selectedDevice.value = device;
@@ -355,21 +388,15 @@ const showDeleteConfirm = ref(false);
 const deviceToDelete = ref(null);
 
 const confirmDelete = (device) => {
-    deviceToDelete.value = device;
-    showDeleteConfirm.value = true;
-};
-
-const handleConfirmDelete = () => {
-    if (deviceToDelete.value) {
-        deleteDevice(deviceToDelete.value);
-        showDeleteConfirm.value = false;
-        deviceToDelete.value = null;
+    if (confirm(`确认删除设备 ${device.name}？`)) {
+        deleteDevice(device);
     }
 };
 
 const deleteDevice = async (device) => {
     try {
-        const response = await axios.delete(`${BASE_URL}/deleteDeviceByTypeAndId/${device.type}/${device.id}`);
+        // Changed to POST and new endpoint as per requirement
+        const response = await axios.post(`${BASE_URL}/deleteDeviceByTypeAndId/${device.id}`);
         if (response.data.code === SUCCESS_CODE) {
             notificationStore.success('设备删除成功');
             fetchDevices();
@@ -497,14 +524,9 @@ const submitChangeInfo = async () => {
     } catch (error) { notificationStore.error('更新失败'); }
 };
 
-const fetchDevicesAndStatus = async (type = '') => {
-    await fetchDevices(type);
-    devices.value.forEach(d => checkSimulatorStatus(d.id));
-};
-
 onMounted(async () => {
     await fetchDeviceTypes();
-    await fetchDevicesAndStatus();
+    await fetchDevices();
 });
 
 const hexToPlaintext = (hex) => {
@@ -560,6 +582,8 @@ const plaintextToHex = (text) => {
 .mb-4 { margin-bottom: 16px; }
 .flex-1 { flex: 1; }
 .items-center { align-items: center; }
+.justify-center { justify-content: center; }
 .cursor-pointer { cursor: pointer; }
 .p-2 { padding: 8px; }
+.pagination { padding: 10px 0; border-top: 1px solid var(--border-color); }
 </style>
