@@ -135,8 +135,8 @@ const fetchMessages = async () => {
 
     const response = await axios.post(url, payload);
     if (response.data.code === SUCCESS_CODE) {
-      messages.value = response.data.data.list || [];
-      totalPages.value = response.data.data.pages || 0;
+      messages.value = response.data.data.records || response.data.data.list || [];
+      totalPages.value = response.data.data.pages || (messages.value.length > 0 ? 1 : 0);
     }
   } catch (error) { notificationStore.error('获取列表失败'); }
 };

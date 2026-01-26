@@ -352,8 +352,8 @@ const fetchDevices = async () => {
 
         const response = await axios.post(url, payload);
         if (response.data.code === SUCCESS_CODE) {
-            devices.value = response.data.data.list || [];
-            totalPages.value = response.data.data.pages || 0;
+            devices.value = response.data.data.records || response.data.data.list || [];
+            totalPages.value = response.data.data.pages || (devices.value.length > 0 ? 1 : 0);
             devices.value.forEach(d => checkSimulatorStatus(d.id));
         }
     } catch (error) { notificationStore.error('获取设备列表失败'); }
@@ -373,8 +373,8 @@ const fetchConnectedDevices = async () => {
     try {
         const response = await axios.post(`${BASE_URL}/getAllConnectedDeviceStatesPage`, connectedPageParam.value);
         if (response.data.code === SUCCESS_CODE) {
-          connectedDevices.value = response.data.data.list || [];
-          connectedTotalPages.value = response.data.data.pages || 0;
+          connectedDevices.value = response.data.data.records || response.data.data.list || [];
+          connectedTotalPages.value = response.data.data.pages || (connectedDevices.value.length > 0 ? 1 : 0);
         }
     } catch (error) { notificationStore.error('获取失败'); }
 };

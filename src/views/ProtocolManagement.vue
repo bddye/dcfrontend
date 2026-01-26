@@ -224,8 +224,8 @@ const fetchProtocols = async () => {
   try {
     const response = await axios.post(`${BASE_URL}/getAllProtocolsPage`, pageParam.value);
     if (response.data.code === SUCCESS_CODE) {
-      protocols.value = response.data.data.list || [];
-      totalPages.value = response.data.data.pages || 0;
+      protocols.value = response.data.data.records || response.data.data.list || [];
+      totalPages.value = response.data.data.pages || (protocols.value.length > 0 ? 1 : 0);
     }
   } catch (e) { notificationStore.error('获取列表失败'); }
 };
