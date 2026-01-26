@@ -43,6 +43,13 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination controls -->
+        <div class="pagination mt-4 flex items-center justify-center gap-4" v-if="totalPages > 1">
+          <button @click="changePage(pageParam.pageNo - 1)" :disabled="pageParam.pageNo <= 1" class="btn btn-sm btn-secondary">上一页</button>
+          <span class="text-sm">第 {{ pageParam.pageNo }} / {{ totalPages }} 页</span>
+          <button @click="changePage(pageParam.pageNo + 1)" :disabled="pageParam.pageNo >= totalPages" class="btn btn-sm btn-secondary">下一页</button>
+        </div>
       </div>
     </div>
 
@@ -191,6 +198,12 @@ const newProtocol = ref({});
 const selectedProtocol = ref(null);
 const filesToUpload = ref([]); 
 const fileInputs = ref([]);
+const totalPages = ref(0);
+const pageParam = ref({
+    pageNo: 1,
+    pageSize: 10,
+    param: null
+});
 
 const BASE_URL = config.BASE_URL+'/jar';
 const SUCCESS_CODE = 200;
@@ -209,9 +222,17 @@ const isUpdateFormValid = computed(() => {
 
 const fetchProtocols = async () => {
   try {
-    const res = await axios.get(`${BASE_URL}/getAllProtocols`);
-    if (res.data.code === SUCCESS_CODE) protocols.value = res.data.data || [];
+    const response = await axios.post(`${BASE_URL}/getAllProtocolsPage`, pageParam.value);
+    if (response.data.code === SUCCESS_CODE) {
+      protocols.value = response.data.data.records || response.data.data.list || [];
+      totalPages.value = response.data.data.pages || (protocols.value.length > 0 ? 1 : 0);
+    }
   } catch (e) { notificationStore.error('获取列表失败'); }
+};
+
+const changePage = (page) => {
+    pageParam.value.pageNo = page;
+    fetchProtocols();
 };
 
 const openUploadModal = async () => {
@@ -325,6 +346,7 @@ onMounted(fetchProtocols);
 <style scoped>
 .ml-2 { margin-left: 8px; }
 .items-center { align-items: center; }
+.justify-center { justify-content: center; }
 .items-end { align-items: flex-end; }
 .justify-between { justify-content: space-between; }
 .gap-2 { gap: 8px; }
@@ -334,4 +356,5 @@ onMounted(fetchProtocols);
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bg-gray-50 { background-color: #f9fafb; }
 .compact td, .compact th { padding: 8px; }
+.pagination { padding: 10px 0; border-top: 1px solid var(--border-color); }
 </style>

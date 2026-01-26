@@ -2,7 +2,7 @@
   <div class="page-container">
     <div class="card">
       <div class="search-panel">
-        <select class="form-select w-64" v-model="searchCriteria.messageType">
+        <select class="form-select w-64" v-model="selectedType">
           <option value="">全部类型</option>
           <option v-for="type in messageTypes" :key="type" :value="type">{{ type }}</option>
         </select>
@@ -41,6 +41,13 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination controls -->
+        <div class="pagination mt-4 flex items-center justify-center gap-4" v-if="totalPages > 1">
+          <button @click="changePage(pageParam.pageNo - 1)" :disabled="pageParam.pageNo <= 1" class="btn btn-sm btn-secondary">上一页</button>
+          <span class="text-sm">第 {{ pageParam.pageNo }} / {{ totalPages }} 页</span>
+          <button @click="changePage(pageParam.pageNo + 1)" :disabled="pageParam.pageNo >= totalPages" class="btn btn-sm btn-secondary">下一页</button>
+        </div>
       </div>
     </div>
 
@@ -67,8 +74,15 @@ const SUCCESS_CODE = 200;
 
 const messages = ref([]);
 const messageTypes = ref([]);
+const selectedType = ref('');
 const showDetailsModal = ref(false);
 const selectedMessageDetail = ref({});
+const totalPages = ref(0);
+const pageParam = ref({
+    pageNo: 1,
+    pageSize: 10,
+    param: null
+});
 
 const detailKeyMap = {
     id: '消息 ID',
@@ -79,8 +93,6 @@ const detailKeyMap = {
     status: '处理状态',
     payload: '消息内容',
 };
-
-const searchCriteria = ref({ messageType: '' });
 
 const formattedDetails = computed(() => {
     const detail = selectedMessageDetail.value;
@@ -111,25 +123,37 @@ const fetchMessageTypes = async () => {
 
 const fetchMessages = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/getAllMessages`);
+    const type = selectedType.value;
+    const url = type ? `${BASE_URL}/getMessagesPageByType` : `${BASE_URL}/getAllMessagesPage`;
+
+    // PageParam<Message>
+    const payload = {
+      pageNo: pageParam.value.pageNo,
+      pageSize: pageParam.value.pageSize,
+      param: type ? { type: type } : null
+    };
+
+    const response = await axios.post(url, payload);
     if (response.data.code === SUCCESS_CODE) {
-      messages.value = response.data.data || [];
+      messages.value = response.data.data.records || response.data.data.list || [];
+      totalPages.value = response.data.data.pages || (messages.value.length > 0 ? 1 : 0);
     }
   } catch (error) { notificationStore.error('获取列表失败'); }
 };
 
-const executeSearch = async () => {
-  const type = searchCriteria.value.messageType;
-  if (type) {
-    messages.value = messages.value.filter(msg => msg.type === type);
-  } else {
-    await fetchMessages();
-  }
+const executeSearch = () => {
+    pageParam.value.pageNo = 1;
+    fetchMessages();
+};
+
+const changePage = (page) => {
+    pageParam.value.pageNo = page;
+    fetchMessages();
 };
 
 const resetSearch = () => {
-  searchCriteria.value.messageType = '';
-  fetchMessages();
+  selectedType.value = '';
+  executeSearch();
 };
 
 const showDetails = (msg) => {
@@ -149,4 +173,7 @@ onMounted(() => {
 .details-item:last-child { border-bottom: none; }
 .details-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
 .details-value { font-size: 14px; white-space: pre-wrap; word-break: break-all; }
+.pagination { padding: 10px 0; border-top: 1px solid var(--border-color); }
+.justify-center { justify-content: center; }
+.items-center { align-items: center; }
 </style>

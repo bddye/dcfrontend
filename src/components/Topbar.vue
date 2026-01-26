@@ -9,10 +9,7 @@
       </div>
     </div>
     <div class="topbar-right">
-      <div class="user-info">
-        <span class="user-avatar">👤</span>
-        <span class="user-name">管理员</span>
-      </div>
+      <!-- Administrator info removed as per requirement -->
     </div>
   </header>
 </template>

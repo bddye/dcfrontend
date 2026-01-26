@@ -8,17 +8,19 @@
 
       <div v-if="currentTab === 'registration'">
         <div class="search-panel">
-          <input type="text" class="form-input w-64" placeholder="请输入检索内容" v-model="selectedType" />
+          <select class="form-select w-64" v-model="selectedType">
+            <option value="">全部类型</option>
+            <option v-for="type in deviceTypes" :key="type" :value="type">{{ type }}</option>
+          </select>
           <button @click="searchDevices" class="btn btn-primary">查询</button>
           <button @click="selectedType = ''; searchDevices()" class="btn btn-secondary">重置</button>
           <button @click="openCreateModal" class="btn btn-success ml-auto">+ 创建</button>
-          <button class="btn btn-danger" disabled>删除</button>
         </div>
       </div>
 
       <div v-else-if="currentTab === 'connected'">
         <div class="search-panel">
-          <button @click="fetchConnectedDevices" class="btn btn-primary">查询全部</button>
+          <button @click="searchConnectedDevices" class="btn btn-primary">查询全部</button>
           <button @click="openConnectModal" class="btn btn-success ml-auto">主动连接</button>
         </div>
       </div>
@@ -57,6 +59,13 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination controls -->
+        <div class="pagination mt-4 flex items-center justify-center gap-4" v-if="totalPages > 1">
+          <button @click="changePage(pageParam.pageNo - 1)" :disabled="pageParam.pageNo <= 1" class="btn btn-sm btn-secondary">上一页</button>
+          <span class="text-sm">第 {{ pageParam.pageNo }} / {{ totalPages }} 页</span>
+          <button @click="changePage(pageParam.pageNo + 1)" :disabled="pageParam.pageNo >= totalPages" class="btn btn-sm btn-secondary">下一页</button>
+        </div>
       </div>
 
       <div v-else-if="currentTab === 'connected'" class="table-container">
@@ -91,10 +100,17 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination for connected devices -->
+        <div class="pagination mt-4 flex items-center justify-center gap-4" v-if="connectedTotalPages > 1">
+          <button @click="changeConnectedPage(connectedPageParam.pageNo - 1)" :disabled="connectedPageParam.pageNo <= 1" class="btn btn-sm btn-secondary">上一页</button>
+          <span class="text-sm">第 {{ connectedPageParam.pageNo }} / {{ connectedTotalPages }} 页</span>
+          <button @click="changeConnectedPage(connectedPageParam.pageNo + 1)" :disabled="connectedPageParam.pageNo >= connectedTotalPages" class="btn btn-sm btn-secondary">下一页</button>
+        </div>
       </div>
     </div>
 
-    <!-- Modals (rest of logic remains same but using refined CommonModal) -->
+    <!-- Modals -->
     <CommonModal v-model="showModal" title="设备详情" :showConfirm="false" cancelText="关闭">
       <pre class="details-pre">{{ JSON.stringify(selectedDevice, null, 2) }}</pre>
     </CommonModal>
@@ -254,6 +270,21 @@ const currentTab = ref('registration');
 const devices = ref([]);
 const deviceTypes = ref([]);
 const selectedType = ref('');
+const totalPages = ref(0);
+const pageParam = ref({
+    pageNo: 1,
+    pageSize: 10,
+    param: null
+});
+
+const connectedDevices = ref([]);
+const connectedTotalPages = ref(0);
+const connectedPageParam = ref({
+    pageNo: 1,
+    pageSize: 10,
+    param: null
+});
+
 const showModal = ref(false);
 const selectedDevice = ref(null);
 const showCreateModal = ref(false);
@@ -269,7 +300,6 @@ const simulatorForm = ref({
 });
 const simulatorTypeOptions = ref([]);
 const tcpDataFormat = ref('plaintext');
-const connectedDevices = ref([]);
 const showConnectModal = ref(false);
 const showChangeInfoModal = ref(false);
 const how2decodeOptions = ref([]);
@@ -308,15 +338,56 @@ const fetchDeviceTypes = async () => {
     } catch (error) { notificationStore.error('获取设备种类失败'); }
 };
 
-const fetchDevices = async (type = '') => {
+const fetchDevices = async () => {
     try {
-        const url = type ? `${BASE_URL}/getDevicesByType?type=${type}` : `${BASE_URL}/getAllDevices`;
-        const response = await axios.get(url);
-        if (response.data.code === SUCCESS_CODE) devices.value = response.data.data || [];
+        const type = selectedType.value;
+        const url = type ? `${BASE_URL}/getDevicesPageByType` : `${BASE_URL}/getAllDevicesPage`;
+
+        // Prepare PageParam<DeviceDal>
+        const payload = {
+          pageNo: pageParam.value.pageNo,
+          pageSize: pageParam.value.pageSize,
+          param: type ? { type: type } : null
+        };
+
+        const response = await axios.post(url, payload);
+        if (response.data.code === SUCCESS_CODE) {
+            devices.value = response.data.data.records || response.data.data.list || [];
+            totalPages.value = response.data.data.pages || (devices.value.length > 0 ? 1 : 0);
+            devices.value.forEach(d => checkSimulatorStatus(d.id));
+        }
     } catch (error) { notificationStore.error('获取设备列表失败'); }
 };
 
-const searchDevices = () => fetchDevicesAndStatus(selectedType.value);
+const searchDevices = () => {
+    pageParam.value.pageNo = 1;
+    fetchDevices();
+};
+
+const changePage = (page) => {
+    pageParam.value.pageNo = page;
+    fetchDevices();
+};
+
+const fetchConnectedDevices = async () => {
+    try {
+        const response = await axios.post(`${BASE_URL}/getAllConnectedDeviceStatesPage`, connectedPageParam.value);
+        if (response.data.code === SUCCESS_CODE) {
+          connectedDevices.value = response.data.data.records || response.data.data.list || [];
+          connectedTotalPages.value = response.data.data.pages || (connectedDevices.value.length > 0 ? 1 : 0);
+        }
+    } catch (error) { notificationStore.error('获取失败'); }
+};
+
+const searchConnectedDevices = () => {
+    connectedPageParam.value.pageNo = 1;
+    fetchConnectedDevices();
+};
+
+const changeConnectedPage = (page) => {
+    connectedPageParam.value.pageNo = page;
+    fetchConnectedDevices();
+};
 
 const showDetails = (device) => {
     selectedDevice.value = device;
@@ -351,25 +422,15 @@ const submitNewDevice = async () => {
     } catch (error) { notificationStore.error('创建设备失败'); }
 };
 
-const showDeleteConfirm = ref(false);
-const deviceToDelete = ref(null);
-
 const confirmDelete = (device) => {
-    deviceToDelete.value = device;
-    showDeleteConfirm.value = true;
-};
-
-const handleConfirmDelete = () => {
-    if (deviceToDelete.value) {
-        deleteDevice(deviceToDelete.value);
-        showDeleteConfirm.value = false;
-        deviceToDelete.value = null;
+    if (confirm(`确认删除设备 ${device.name}？`)) {
+        deleteDevice(device);
     }
 };
 
 const deleteDevice = async (device) => {
     try {
-        const response = await axios.delete(`${BASE_URL}/deleteDeviceByTypeAndId/${device.type}/${device.id}`);
+        const response = await axios.post(`${BASE_URL}/deleteDeviceByTypeAndId/${device.id}`);
         if (response.data.code === SUCCESS_CODE) {
             notificationStore.success('设备删除成功');
             fetchDevices();
@@ -450,13 +511,6 @@ const executeSimulateAction = async (choice) => {
     } catch (error) { notificationStore.error('请求失败'); }
 };
 
-const fetchConnectedDevices = async () => {
-    try {
-        const response = await axios.get(`${config.BASE_URL}/deviceControl/getAllConnectedDeviceStates`);
-        if (response.data.code === SUCCESS_CODE) connectedDevices.value = response.data.data || [];
-    } catch (error) { notificationStore.error('获取失败'); }
-};
-
 const openConnectModal = async () => {
     connectForm.value = { connectionMethod: 'TCP', ip: '', port: null, bufferProcessMode: 'DELIMITED', script: null, how2decode: '', decode2what: '' };
     showConnectModal.value = true;
@@ -497,14 +551,10 @@ const submitChangeInfo = async () => {
     } catch (error) { notificationStore.error('更新失败'); }
 };
 
-const fetchDevicesAndStatus = async (type = '') => {
-    await fetchDevices(type);
-    devices.value.forEach(d => checkSimulatorStatus(d.id));
-};
-
 onMounted(async () => {
     await fetchDeviceTypes();
-    await fetchDevicesAndStatus();
+    await fetchDevices();
+    await fetchConnectedDevices();
 });
 
 const hexToPlaintext = (hex) => {
@@ -560,6 +610,8 @@ const plaintextToHex = (text) => {
 .mb-4 { margin-bottom: 16px; }
 .flex-1 { flex: 1; }
 .items-center { align-items: center; }
+.justify-center { justify-content: center; }
 .cursor-pointer { cursor: pointer; }
 .p-2 { padding: 8px; }
+.pagination { padding: 10px 0; border-top: 1px solid var(--border-color); }
 </style>
