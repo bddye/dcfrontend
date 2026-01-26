@@ -133,11 +133,7 @@ const fetchMessages = async () => {
       param: type ? { type: type } : null
     };
 
-    const response = await axios.request({
-      method: 'get',
-      url: url,
-      data: payload
-    });
+    const response = await axios.post(url, payload);
     if (response.data.code === SUCCESS_CODE) {
       messages.value = response.data.data.list || [];
       totalPages.value = response.data.data.pages || 0;

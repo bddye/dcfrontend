@@ -222,11 +222,7 @@ const isUpdateFormValid = computed(() => {
 
 const fetchProtocols = async () => {
   try {
-    const response = await axios.request({
-      method: 'get',
-      url: `${BASE_URL}/getAllProtocolsPage`,
-      data: pageParam.value
-    });
+    const response = await axios.post(`${BASE_URL}/getAllProtocolsPage`, pageParam.value);
     if (response.data.code === SUCCESS_CODE) {
       protocols.value = response.data.data.list || [];
       totalPages.value = response.data.data.pages || 0;
