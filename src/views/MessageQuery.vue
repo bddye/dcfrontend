@@ -2,7 +2,7 @@
   <div class="page-container">
     <div class="card">
       <div class="search-panel">
-        <select class="form-select w-64" v-model="pageParam.param">
+        <select class="form-select w-64" v-model="selectedType">
           <option value="">全部类型</option>
           <option v-for="type in messageTypes" :key="type" :value="type">{{ type }}</option>
         </select>
@@ -74,13 +74,14 @@ const SUCCESS_CODE = 200;
 
 const messages = ref([]);
 const messageTypes = ref([]);
+const selectedType = ref('');
 const showDetailsModal = ref(false);
 const selectedMessageDetail = ref({});
 const totalPages = ref(0);
 const pageParam = ref({
     pageNo: 1,
     pageSize: 10,
-    param: ''
+    param: null
 });
 
 const detailKeyMap = {
@@ -122,12 +123,20 @@ const fetchMessageTypes = async () => {
 
 const fetchMessages = async () => {
   try {
-    const type = pageParam.value.param;
+    const type = selectedType.value;
     const url = type ? `${BASE_URL}/getMessagesPageByType` : `${BASE_URL}/getAllMessagesPage`;
+
+    // PageParam<Message>
+    const payload = {
+      pageNo: pageParam.value.pageNo,
+      pageSize: pageParam.value.pageSize,
+      param: type ? { type: type } : null
+    };
+
     const response = await axios.request({
       method: 'get',
       url: url,
-      data: pageParam.value
+      data: payload
     });
     if (response.data.code === SUCCESS_CODE) {
       messages.value = response.data.data.list || [];
@@ -147,7 +156,7 @@ const changePage = (page) => {
 };
 
 const resetSearch = () => {
-  pageParam.value.param = '';
+  selectedType.value = '';
   executeSearch();
 };
 

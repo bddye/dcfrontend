@@ -202,7 +202,7 @@ const totalPages = ref(0);
 const pageParam = ref({
     pageNo: 1,
     pageSize: 10,
-    param: ''
+    param: null
 });
 
 const BASE_URL = config.BASE_URL+'/jar';

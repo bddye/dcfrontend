@@ -8,19 +8,19 @@
 
       <div v-if="currentTab === 'registration'">
         <div class="search-panel">
-          <select class="form-select w-64" v-model="pageParam.param">
+          <select class="form-select w-64" v-model="selectedType">
             <option value="">全部类型</option>
             <option v-for="type in deviceTypes" :key="type" :value="type">{{ type }}</option>
           </select>
           <button @click="searchDevices" class="btn btn-primary">查询</button>
-          <button @click="pageParam.param = ''; searchDevices()" class="btn btn-secondary">重置</button>
+          <button @click="selectedType = ''; searchDevices()" class="btn btn-secondary">重置</button>
           <button @click="openCreateModal" class="btn btn-success ml-auto">+ 创建</button>
         </div>
       </div>
 
       <div v-else-if="currentTab === 'connected'">
         <div class="search-panel">
-          <button @click="fetchConnectedDevices" class="btn btn-primary">查询全部</button>
+          <button @click="searchConnectedDevices" class="btn btn-primary">查询全部</button>
           <button @click="openConnectModal" class="btn btn-success ml-auto">主动连接</button>
         </div>
       </div>
@@ -100,6 +100,13 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination for connected devices -->
+        <div class="pagination mt-4 flex items-center justify-center gap-4" v-if="connectedTotalPages > 1">
+          <button @click="changeConnectedPage(connectedPageParam.pageNo - 1)" :disabled="connectedPageParam.pageNo <= 1" class="btn btn-sm btn-secondary">上一页</button>
+          <span class="text-sm">第 {{ connectedPageParam.pageNo }} / {{ connectedTotalPages }} 页</span>
+          <button @click="changeConnectedPage(connectedPageParam.pageNo + 1)" :disabled="connectedPageParam.pageNo >= connectedTotalPages" class="btn btn-sm btn-secondary">下一页</button>
+        </div>
       </div>
     </div>
 
@@ -262,11 +269,20 @@ import { notificationStore } from '../notification';
 const currentTab = ref('registration');
 const devices = ref([]);
 const deviceTypes = ref([]);
+const selectedType = ref('');
 const totalPages = ref(0);
 const pageParam = ref({
     pageNo: 1,
     pageSize: 10,
-    param: ''
+    param: null
+});
+
+const connectedDevices = ref([]);
+const connectedTotalPages = ref(0);
+const connectedPageParam = ref({
+    pageNo: 1,
+    pageSize: 10,
+    param: null
 });
 
 const showModal = ref(false);
@@ -284,7 +300,6 @@ const simulatorForm = ref({
 });
 const simulatorTypeOptions = ref([]);
 const tcpDataFormat = ref('plaintext');
-const connectedDevices = ref([]);
 const showConnectModal = ref(false);
 const showChangeInfoModal = ref(false);
 const how2decodeOptions = ref([]);
@@ -325,13 +340,20 @@ const fetchDeviceTypes = async () => {
 
 const fetchDevices = async () => {
     try {
-        const type = pageParam.value.param;
+        const type = selectedType.value;
         const url = type ? `${BASE_URL}/getDevicesPageByType` : `${BASE_URL}/getAllDevicesPage`;
-        // As per requirement, use @RequestBody for GET. Axios doesn't support body in .get(), using .request instead.
+
+        // Prepare PageParam<DeviceDal>
+        const payload = {
+          pageNo: pageParam.value.pageNo,
+          pageSize: pageParam.value.pageSize,
+          param: type ? { type: type } : null
+        };
+
         const response = await axios.request({
             method: 'get',
             url: url,
-            data: pageParam.value
+            data: payload
         });
         if (response.data.code === SUCCESS_CODE) {
             devices.value = response.data.data.list || [];
@@ -349,6 +371,30 @@ const searchDevices = () => {
 const changePage = (page) => {
     pageParam.value.pageNo = page;
     fetchDevices();
+};
+
+const fetchConnectedDevices = async () => {
+    try {
+        const response = await axios.request({
+            method: 'get',
+            url: `${BASE_URL}/getAllConnectedDeviceStatesPage`,
+            data: connectedPageParam.value
+        });
+        if (response.data.code === SUCCESS_CODE) {
+          connectedDevices.value = response.data.data.list || [];
+          connectedTotalPages.value = response.data.data.pages || 0;
+        }
+    } catch (error) { notificationStore.error('获取失败'); }
+};
+
+const searchConnectedDevices = () => {
+    connectedPageParam.value.pageNo = 1;
+    fetchConnectedDevices();
+};
+
+const changeConnectedPage = (page) => {
+    connectedPageParam.value.pageNo = page;
+    fetchConnectedDevices();
 };
 
 const showDetails = (device) => {
@@ -384,9 +430,6 @@ const submitNewDevice = async () => {
     } catch (error) { notificationStore.error('创建设备失败'); }
 };
 
-const showDeleteConfirm = ref(false);
-const deviceToDelete = ref(null);
-
 const confirmDelete = (device) => {
     if (confirm(`确认删除设备 ${device.name}？`)) {
         deleteDevice(device);
@@ -395,7 +438,6 @@ const confirmDelete = (device) => {
 
 const deleteDevice = async (device) => {
     try {
-        // Changed to POST and new endpoint as per requirement
         const response = await axios.post(`${BASE_URL}/deleteDeviceByTypeAndId/${device.id}`);
         if (response.data.code === SUCCESS_CODE) {
             notificationStore.success('设备删除成功');
@@ -477,13 +519,6 @@ const executeSimulateAction = async (choice) => {
     } catch (error) { notificationStore.error('请求失败'); }
 };
 
-const fetchConnectedDevices = async () => {
-    try {
-        const response = await axios.get(`${config.BASE_URL}/deviceControl/getAllConnectedDeviceStates`);
-        if (response.data.code === SUCCESS_CODE) connectedDevices.value = response.data.data || [];
-    } catch (error) { notificationStore.error('获取失败'); }
-};
-
 const openConnectModal = async () => {
     connectForm.value = { connectionMethod: 'TCP', ip: '', port: null, bufferProcessMode: 'DELIMITED', script: null, how2decode: '', decode2what: '' };
     showConnectModal.value = true;
@@ -527,6 +562,7 @@ const submitChangeInfo = async () => {
 onMounted(async () => {
     await fetchDeviceTypes();
     await fetchDevices();
+    await fetchConnectedDevices();
 });
 
 const hexToPlaintext = (hex) => {
